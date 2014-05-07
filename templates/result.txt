@@ -1,0 +1,4 @@
+{% block title %}{% endblock %}
+{% filter indent(7) %}
+{% block details %}{% endblock %}
+{% endfilter %}

@@ -1,0 +1,5 @@
+{% extends "result.txt" %}
+
+{% block title %}
+<success> ✓ {{ index|pad_left_2 }}) {{ path }} </success>
+{% endblock %}

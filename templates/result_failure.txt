@@ -1,0 +1,13 @@
+{% extends "result.txt" %}
+
+{% block title %}
+<fail> ✘ {{ index|pad_left_2 }}) {{ path }} </fail>
+{% endblock %}
+
+{% block details %}
+<info>Exception:</info> {{ exception_message }}
+<info>Via:</info>
+{% for trace in exception_traces %}
+{{ loop.index|pad_left_3 }}. {{ trace }}
+{% endfor %}
+{% endblock %}
