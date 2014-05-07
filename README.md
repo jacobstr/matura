@@ -57,3 +57,5 @@ return describe('User', function ($test) {
     });
 });
 ```
+
+![Matura Shell Output](docs/sample_shell_output.png)
