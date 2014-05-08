@@ -6,11 +6,12 @@ use Matura\Core\TestContext;
 
 use Matura\Exceptions\Exception;
 
+/**
+ * This classes specific role is unclear at the moment. It mostly manages DSL
+ * generation.
+ */
 class Matura
 {
-    /** @var Builder $builder The active builder object. */
-    protected static $builder;
-
     /** @var Builder $builder The active builder object. */
     protected static $error_handler;
 
@@ -47,62 +48,20 @@ class Matura
     {
     }
 
-    /**
-     * Gets the active builder.
-     *
-     * @return Builder
-     */
-    public static function getBuilder()
+    public static function buildFile($path, Builder $builder)
     {
-        return self::$builder;
-    }
-
-    /**
-     * Initializes Matura:
-     *
-     * 1. Sets our error handler as PHP's error handler.
-     * 2. Imports our DSL into the global namespace.
-     * 3. Initializes a new active Builder instance.
-     *
-     * @param Callable $fn An optional callback that is invoked with the current
-     *  TestContext.
-     * @param TestContext $test_context An optional, injectable test context.
-     *
-     * @return Builder
-     */
-    public static function start($fn = null, TestContext $test_context = null)
-    {
-        if (self::$builder !== null) {
-            throw new Exception('A builder already exists! Reset first if you want to discard it.');
-        }
-
-        if ($fn !== null && ! is_callable($fn)) {
-            throw new Exception('The $fn parameter was provided, but was not callable.');
-        }
-
         require_once(__DIR__ . '/functions.php');
-
-        self::$builder = new Builder($test_context);
-
-        if ($fn) {
-            $fn(self::getBuilder()->context());
-        }
-
-        return self::getBuilder();
-    }
-
-
-    public static function reset()
-    {
-        self::$builder = null;
+        $builder->with(function () use ($path) {
+            require $path;
+        });
+        return $builder;
     }
 
     /**
      * Workaround for the lack of https://wiki.php.net/rfc/use_function in
      * PHP < 5.6.
      *
-     * Generates our functions.php consisting of a set of methods, in the global
-     * namespace by default, that mostly forward to a singleton Builder instance.
+     * Generates source code that can be output to a file or eval'd.
      *
      * ATM this is not designed to be used by Matura's users - even though the
      * variable namespace support might appeal or even be a requirement for some
@@ -112,7 +71,7 @@ class Matura
      *
      * @return string The code that was dumped into functions.php.
      */
-    public static function exportDSL($target_namespace = '', $target_filename = null, $method_prefix = '')
+    public static function generateDSL($target_namespace = '', $method_prefix = '')
     {
         $generate_method = function ($name) use ($method_prefix) {
 
@@ -124,7 +83,7 @@ class Matura
       {
           return call_user_func_array(
               array(
-                  \Matura\Matura::getBuilder(),
+                  \Matura\Core\Builder::getActiveBuilder(),
                   '$name'
               ),
               func_get_args()
@@ -134,7 +93,7 @@ class Matura
 EOD;
         };
 
-        $method_code = implode(array_map($generate_method, $method_names), "");
+        $method_code = implode(array_map($generate_method, static::$method_names), "");
 
         $final_code = <<<EOD
 <?php
@@ -143,10 +102,21 @@ namespace $target_namespace {
     $method_code
 }
 EOD;
+        return $final_code;
+    }
+
+    public static function dynamicDSL($target_namespace = '', $method_prefix = '')
+    {
+        $source_code = static::generateDSL($target_namespace, $method_prefix);
+        eval($source_code);
+    }
+
+    public static function exportDSL($target_filename = null, $target_namespace = '', $method_prefix = '')
+    {
+        $source_code = static::generateDSL($target_namespace, $method_prefix);
+
         $target_filename = $target_filename ?: __DIR__.'/functions.php';
 
-        file_put_contents($target_filename, $final_code);
-
-        return $final_code;
+        file_put_contents($target_filename, $source_code);
     }
 }

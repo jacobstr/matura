@@ -4,6 +4,7 @@ use Matura\Blocks\Describe;
 use Matura\Blocks\Methods\TestMethod;
 
 use Matura\Exceptions\SkippedException;
+use Matura\Exceptions\AssertionException;
 
 use Matura\Core\TestContext;
 use Matura\Core\ResultSet;
@@ -12,12 +13,13 @@ use Matura\Core\Result;
 use Matura\Events\Listener;
 use Matura\Events\Emitter;
 
+use Esperance\Error as EsperanceError;
+
 class TestRunner implements Emitter
 {
     protected $root_block = null;
     protected $context = null;
     protected $result_set = null;
-
     protected $listeners = array();
 
     public function addListener(Listener $listener)
@@ -33,15 +35,21 @@ class TestRunner implements Emitter
     }
 
     public function run(
-        Describe $root_block,
+        Builder $builder,
         TestContext $context,
         ResultSet $result_set
     ) {
-        $tests = $root_block->collectTests();
 
-        foreach ($tests as $test) {
-            $result_set->addResult($this->runTest($test, $context, $result_set));
-        }
+        $runner = $this;
+        $builder->with(function () use (
+            $builder, $context, $result_set, $runner
+        ) {
+            $tests = $builder->getRootDescribe()->collectTests();
+
+            foreach ($tests as $test) {
+                $result_set->addResult($runner->runTest($test, $context, $result_set));
+            }
+        });
 
         $this->emit('test_set.complete', array($result_set));
 
@@ -61,6 +69,9 @@ class TestRunner implements Emitter
                 $hook_or_test->invoke($context);
             });
             $status = Result::SUCCESS;
+        } catch (EsperanceError $e) {
+            $status = Result::FAILURE;
+            $return_value = new AssertionException($e->getMessage(), $e->getCode(), $e);
         } catch (SkippedException $e) {
             $status = Result::SKIPPED;
             $return_value = $e;

@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block details %}
-<info>Exception:</info> {{ exception_message }}
+<info>{{ exception_category }}:</info> {{ exception_message }}
 <info>Via:</info>
 {% for trace in exception_traces %}
 {{ loop.index|pad_left_3 }}. {{ trace }}

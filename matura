@@ -3,8 +3,8 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use Matura\Console\TestCommand;
-use Matura\Console\ExportDSLCommand;
+use Matura\Console\Commands\Test as TestCommand;
+use Matura\Console\Commands\ExportDSL as ExportDSLCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();

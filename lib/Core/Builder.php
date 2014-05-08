@@ -10,6 +10,9 @@ use Matura\Blocks\Block;
  * and actually executes the methods defined in the global DSL (@see
  * functions.php).
  *
+ * There's a bit of discordance currently with our Blocks and the Builder object.
+ * I'm tempted to rename the class to Suite, for example. Possil
+ *
  * Responsibilities:
  *  - Maintains state (stack of describe blocks, current block) as it builds the
  *    object graph that represents a file's tests.
@@ -18,41 +21,59 @@ use Matura\Blocks\Block;
  */
 class Builder
 {
+
+    // Instance Properties
+    // ###################
     private $describe_root = null;
     private $describe_stack = array();
     private $current_test = null;
-    private $current_method = null;
+
     private $context = null;
+    private $name = null;
 
-    protected static $method_map = array(
-        'describe' => 'describe',
-        'xdescribe' => 'describe',
+    // Class Properties
+    // ################
+    private static $builder_stack = array();
+    private static $builders = array();
 
-        'xit' => 'addTest',
-        'it' => 'addTest',
+    /** @var array $method_map A simple mechanism to assist in method delegation. */
+    private static $method_map = array(
+        'start'       => 'start',
+        'describe'    => 'describe',
+        'xdescribe'   => 'describe',
 
-        'before' => 'before',
-        'xbefore' => 'before',
+        'xit'         => 'addTest',
+        'it'          => 'addTest',
 
-        'after' => 'after',
-        'xafter' => 'after',
+        'before'      => 'before',
+        'xbefore'     => 'before',
 
-        'onceBefore' => 'onceBefore',
+        'after'       => 'after',
+        'xafter'      => 'after',
+
+        'onceBefore'  => 'onceBefore',
         'xonceBefore' => 'onceBefore',
 
-        'onceAfter' => 'onceAfter',
+        'onceAfter'   => 'onceAfter',
         'xonceBefore' => 'onceAfter',
     );
 
 
-    public function __construct(TestContext $context = null)
+    public function __construct($name = '', TestContext $context = null)
     {
+        $this->name = $name;
         $this->context = $context ?: new TestContext();
     }
 
     public function context()
     {
+        error_log(date('c').'|'.__FILE__.'|'.__LINE__.'|'.\Dumpling\Dumpling::d('sdfsdf'));
         return $this->context;
+    }
+
+    public function getRootDescribe()
+    {
+        return $this->describe_root;
     }
 
     public function current()
@@ -81,13 +102,18 @@ class Builder
 
 
     // DSL Dispatch: Delegated To $this->current_test
-    // #######################################
+    // ##############################################
+
+    /**
+     * Begins a fluent expectation, currently using esperance. Invoked when the
+     * test is run (as compared to constructed e.g. describe, before).
+     */
     public function expect($obj)
     {
-        return $this->current_test->addAssertion($obj);
+        return new \Esperance\Assertion($obj);
     }
 
-    // DSL Dispatch: No delegation required.
+    // DSL Dispatch: Not delegated required.
     // #####################################
     public function skip($message = '')
     {
@@ -95,7 +121,7 @@ class Builder
     }
 
     // DSL Dispatch: Delegated to $this->current()
-    // #####################################
+    // ###########################################
 
     /**
      * Creates a new Describe block. The closure is invoked immediately.
@@ -112,7 +138,7 @@ class Builder
             // We're in a nested describe block.
             $this->current()->addDescribe($next);
         } else {
-            // We assume only one top-level describe per file.
+            // We assume only one top-level describe per builder.
             if ($this->describe_root !== null) {
                 throw new Exception(
                     "Defining a second, top-level describe block."
@@ -134,14 +160,13 @@ class Builder
      */
     public function it()
     {
-        $this->current_test = call_user_func_array(
+        return call_user_func_array(
             array(
                 $this->current(),
                 'addTest'
             ),
             func_get_args()
         );
-        return $this->current_test;
     }
 
     /**
@@ -182,5 +207,50 @@ class Builder
         } else {
             return array(self::$method_map[$name], false);
         }
+    }
+
+    // Builder Selection and Activation
+    // ################################
+
+    /**
+     * A kinda sorta context manager as in Python. Invokes $fn with this Builder
+     * pushed onto our Builder stack.
+     */
+    public function with($fn)
+    {
+        static::pushBuilder($this);
+        $result = $fn();
+        static::popBuilder();
+        return $result;
+    }
+
+    public static function getBuilder($builder_name)
+    {
+        return static::$builders[$builder_name];
+    }
+
+    public static function registerBuilder(Builder $builder)
+    {
+        if (isset(static::$builders[$builder->name()])) {
+            throw new Exception("Builder with name {$builder->name()} already exists");
+        }
+
+        static::$builders[$builder->name()] = $builder;
+    }
+
+    public static function getActiveBuilder()
+    {
+        return end(static::$builder_stack);
+    }
+
+    public static function pushBuilder($builder)
+    {
+        static::$builder_stack[] = $builder;
+        return $builder;
+    }
+
+    public static function popBuilder()
+    {
+        return array_pop(static::$builder_stack);
     }
 }

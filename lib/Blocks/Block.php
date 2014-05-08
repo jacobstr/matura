@@ -76,8 +76,6 @@ abstract class Block
     public function addAssertion($obj)
     {
         $this->assertions++;
-
-        return new \Esperance\Assertion($obj);
     }
 
     public function getAssertionCount()

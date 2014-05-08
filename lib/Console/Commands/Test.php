@@ -1,4 +1,4 @@
-<?php namespace matura\console;
+<?php namespace Matura\Console\Commands;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -7,16 +7,18 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
-use Matura\Output\Printer;
+use Matura\Console\Output\Printer;
 
 use Matura\Core\TestContext;
 use Matura\Core\TestRunner;
 use Matura\Core\ResultSet;
+use Matura\Core\ErrorHandler;
+use Matura\Core\Builder;
 
 use Matura\Events\Listener;
 use Matura\Matura;
 
-class TestCommand extends Command implements Listener
+class Test extends Command implements Listener
 {
     protected function configure()
     {
@@ -98,14 +100,22 @@ class TestCommand extends Command implements Listener
         // Bootstrap and Run
         // #################
 
-        Matura::start();
-        $describe_block = require $path;
+        $error_handler = new ErrorHandler();
+
+        set_error_handler(array($error_handler, 'handleError'));
+
+        $builder = Matura::buildFile(
+            $path,
+            new Builder('default', new TestContext())
+        );
 
         $results = $test_runner->run(
-            $describe_block,
+            $builder,
             new TestContext(),
             new ResultSet()
         );
+
+        restore_error_handler();
 
         return $results->exitCode();
     }

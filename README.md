@@ -3,7 +3,7 @@ Matura
 
 A precocious new test framework for PHP.
 
-Not yet ready for consumption.
+Not yet ready for consumption - this is what we call a `spike`.
 
 Examples
 ========

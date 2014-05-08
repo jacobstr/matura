@@ -1,7 +1,8 @@
-<?php namespace Matura\Output;
+<?php namespace Matura\Console\Output;
 
 use Matura\Core\Result;
 use Matura\Core\ResultSet;
+use Matura\Exceptions\Exception as MaturaException;
 
 use Twig_Loader_Filesystem;
 use Twig_Environment;
@@ -22,7 +23,7 @@ class Printer
 
     public function render($template, $context)
     {
-        $loader = new Twig_Loader_Filesystem(__DIR__.'/../../templates');
+        $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../templates');
 
         $twig = new Twig_Environment($loader, array(
             'autoescape' => false
@@ -63,8 +64,9 @@ class Printer
 
         $exception = $result->getException();
         if ($exception) {
-            $context['exception_message'] = $exception->getMessage();
-            $context['exception_traces'] = $this->formatTrace($exception);
+            $context['exception_message']  = $exception->getMessage();
+            $context['exception_category'] = $exception->getCategory();
+            $context['exception_traces']   = $this->formatTrace($exception);
         }
 
         $status_mapping = array(
@@ -87,23 +89,20 @@ class Printer
         return $this->render('summary.txt', $context);
     }
 
-    public function formatTrace($exception)
+    public function formatTrace(MaturaException $exception)
     {
         $trace = array_map(
             function ($trace) {
                 $parts = array();
                 if (isset($trace['file'])) {
-                    $parts[] = $trace['file'];
-                }
-                if (isset($trace['line'])) {
-                    $parts[] = 'L'.$trace['line'];
+                    $parts[] = $trace['file'].':'.$trace['line'];
                 }
                 if (isset($trace['function'])) {
                     $parts[] = $trace['function'].'()';
                 }
                 return implode(" ", $parts);
             },
-            array_slice($exception->getTrace(), 0, $this->options['trace_depth'])
+            array_slice($exception->originalTrace(), 0, $this->options['trace_depth'])
         );
         return $trace;
     }

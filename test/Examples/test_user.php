@@ -30,6 +30,11 @@ return describe('User', function ($test) {
         skip();
     });
 
+    it('should fail because of a E_NOTICE', function ($test) {
+        $arr = array(0);
+        $result = $arr[0] + $arr[1];
+    });
+
     // A nested describe block that groups Model / ORM related tests and
     // assertions.
     describe('Model', function ($test) {
