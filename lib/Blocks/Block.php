@@ -2,6 +2,7 @@
 
 use Matura\Exceptions\SkippedException;
 use Matura\Core\TestContext;
+use Matura\Core\InvocationContext;
 
 abstract class Block
 {
@@ -59,18 +60,15 @@ abstract class Block
         return $this->skipped;
     }
 
-    /**
-     * Note: deliberately eschewing __invoke!
-     */
-    public function invoke(TestContext $context)
+    public function invoke(Suite $suite)
     {
-        $this->invoked = true;
-
         if ($this->isSkipped()) {
             throw new SkippedException($this->skipped_because);
         }
 
-        return call_user_func_array($this->fn, func_get_args());
+        $this->invoked = true;
+
+        return call_user_func($this->fn, $suite);
     }
 
     public function addAssertion($obj)
@@ -115,6 +113,16 @@ abstract class Block
     // Traversal
     // #########
 
+    public function closestSuite()
+    {
+        foreach($this->ancestors() as $ancestor) {
+            if(is_a($ancestor, '\Matura\Blocks\Suite')) {
+                return $ancestor;
+            }
+        }
+        return null;
+    }
+
     public function ancestors()
     {
         $ancestors = array();
@@ -154,5 +162,17 @@ abstract class Block
         if ($parent_block = $this->parentBlock()) {
             $parent_block->traversePre($fn);
         }
+    }
+
+    // Invocation Stack
+
+    protected static function closestDescribe()
+    {
+        return $this->stackGrepClass('\Matura\Blocks\Describe');
+    }
+
+    protected function closestTest()
+    {
+        return $this->stackGrepClass('\Matura\Blocks\Methods\TestMethod');
     }
 }

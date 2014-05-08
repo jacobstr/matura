@@ -1,12 +1,32 @@
 <?php namespace Matura\Test\SelfHosted;
 
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
-
-suite('Fixture', function ($ctx) {
+$suite = suite('Fixture', function ($ctx) {
     describe('Test Skipping', function ($ctx) {
         it('should skip me', function ($test) {
+            skip();
+        });
+    });
+});
 
+return suite('Object Graph', function ($ctx) use ($suite) {
+
+    $ctx->suite = $suite;
+
+    describe('Suite', function ($ctx) {
+        it('should have a top level suite', function($ctx) {
+            expect($ctx->suite)->to->be->an('Matura\Blocks\Suite');
+        });
+
+        it('should have a name', function($ctx) {
+            expect($ctx->suite->path())->to->eql('Fixture');
+        });
+
+        it('should have a path', function($ctx) {
+            expect($ctx->suite->name())->to->eql('Fixture');
+        });
+
+        it('should not have a parent block', function($ctx) {
+            expect($ctx->suite->parentBlock())->to->be(null);
         });
     });
 });

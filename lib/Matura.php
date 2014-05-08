@@ -19,6 +19,9 @@ class Matura
      *  DSL.
      */
     protected static $method_names = array(
+        'suite',
+        'xsuite',
+
         'it',
         'xit',
 
@@ -40,22 +43,6 @@ class Matura
         'expect',
         'skip'
     );
-
-    /**
-     * Private constructor - this class should not be instantiated.
-     */
-    private function __construct()
-    {
-    }
-
-    public static function buildFile($path, Builder $builder)
-    {
-        require_once(__DIR__ . '/functions.php');
-        $builder->with(function () use ($path) {
-            require $path;
-        });
-        return $builder;
-    }
 
     /**
      * Workaround for the lack of https://wiki.php.net/rfc/use_function in
@@ -82,10 +69,7 @@ class Matura
       function $prefixed_name()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  '$name'
-              ),
+              array('\Matura\Core\Builder','$name'),
               func_get_args()
           );
       }

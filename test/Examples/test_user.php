@@ -3,7 +3,7 @@
 use Matura\Test\Support\User;
 use Matura\Test\Support\Group;
 
-return describe('User', function ($test) {
+suite('User', function ($test) {
     before(function ($test) {
         $bob = new User();
         $admins = new Group('admins');

@@ -2,13 +2,26 @@
 // Auto-generated with Matura::exportDSL()
 namespace  {
     
+      function suite()
+      {
+          return call_user_func_array(
+              array('\Matura\Core\Builder','suite'),
+              func_get_args()
+          );
+      }
+
+      function xsuite()
+      {
+          return call_user_func_array(
+              array('\Matura\Core\Builder','xsuite'),
+              func_get_args()
+          );
+      }
+
       function it()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'it'
-              ),
+              array('\Matura\Core\Builder','it'),
               func_get_args()
           );
       }
@@ -16,10 +29,7 @@ namespace  {
       function xit()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xit'
-              ),
+              array('\Matura\Core\Builder','xit'),
               func_get_args()
           );
       }
@@ -27,10 +37,7 @@ namespace  {
       function onceBefore()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'onceBefore'
-              ),
+              array('\Matura\Core\Builder','onceBefore'),
               func_get_args()
           );
       }
@@ -38,10 +45,7 @@ namespace  {
       function xonceBefore()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xonceBefore'
-              ),
+              array('\Matura\Core\Builder','xonceBefore'),
               func_get_args()
           );
       }
@@ -49,10 +53,7 @@ namespace  {
       function before()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'before'
-              ),
+              array('\Matura\Core\Builder','before'),
               func_get_args()
           );
       }
@@ -60,10 +61,7 @@ namespace  {
       function xbefore()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xbefore'
-              ),
+              array('\Matura\Core\Builder','xbefore'),
               func_get_args()
           );
       }
@@ -71,10 +69,7 @@ namespace  {
       function after()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'after'
-              ),
+              array('\Matura\Core\Builder','after'),
               func_get_args()
           );
       }
@@ -82,10 +77,7 @@ namespace  {
       function xafter()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xafter'
-              ),
+              array('\Matura\Core\Builder','xafter'),
               func_get_args()
           );
       }
@@ -93,10 +85,7 @@ namespace  {
       function onceAfter()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'onceAfter'
-              ),
+              array('\Matura\Core\Builder','onceAfter'),
               func_get_args()
           );
       }
@@ -104,10 +93,7 @@ namespace  {
       function xonceAfter()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xonceAfter'
-              ),
+              array('\Matura\Core\Builder','xonceAfter'),
               func_get_args()
           );
       }
@@ -115,10 +101,7 @@ namespace  {
       function describe()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'describe'
-              ),
+              array('\Matura\Core\Builder','describe'),
               func_get_args()
           );
       }
@@ -126,10 +109,7 @@ namespace  {
       function xdescribe()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'xdescribe'
-              ),
+              array('\Matura\Core\Builder','xdescribe'),
               func_get_args()
           );
       }
@@ -137,10 +117,7 @@ namespace  {
       function expect()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'expect'
-              ),
+              array('\Matura\Core\Builder','expect'),
               func_get_args()
           );
       }
@@ -148,10 +125,7 @@ namespace  {
       function skip()
       {
           return call_user_func_array(
-              array(
-                  \Matura\Core\Builder::getActiveBuilder(),
-                  'skip'
-              ),
+              array('\Matura\Core\Builder','skip'),
               func_get_args()
           );
       }

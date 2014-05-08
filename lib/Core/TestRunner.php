@@ -1,5 +1,6 @@
 <?php namespace Matura\Core;
 
+use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Blocks\Methods\TestMethod;
 
@@ -35,38 +36,30 @@ class TestRunner implements Emitter
     }
 
     public function run(
-        Builder $builder,
-        TestContext $context,
+        Suite $suite,
         ResultSet $result_set
     ) {
 
-        $runner = $this;
-        $builder->with(function () use (
-            $builder, $context, $result_set, $runner
-        ) {
-            $tests = $builder->getRootDescribe()->collectTests();
+        $tests = $suite->collectTests();
 
-            foreach ($tests as $test) {
-                $result_set->addResult($runner->runTest($test, $context, $result_set));
-            }
-        });
+        foreach ($tests as $test) {
+            $result_set->addResult($this->runTest($suite, $test, $result_set));
+        }
 
         $this->emit('test_set.complete', array($result_set));
 
         return $result_set;
     }
 
-    public function runTest(TestMethod $test, TestContext $context, ResultSet $result_set = null)
+    public function runTest(Suite $suite, TestMethod $test, ResultSet $result_set = null)
     {
-        $current_method = null;
         $return_value = null;
 
         $this->emit('test.start', array($result_set, $test));
 
         try {
-            $return_value = $test->traverseMethods(function ($hook_or_test) use (&$current_method, $context) {
-                $current_method = $hook_or_test;
-                $hook_or_test->invoke($context);
+            $return_value = $test->traverseMethods(function ($hook_or_test) use ($suite) {
+                InvocationContext::invoke($hook_or_test, $suite);
             });
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {

@@ -2,6 +2,9 @@
 
 use Matura\Exceptions\Exception;
 use Matura\Exceptions\SkippedException;
+
+use Matura\Blocks\Methods\ExpectMethod;
+use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Blocks\Block;
 
@@ -21,24 +24,14 @@ use Matura\Blocks\Block;
  */
 class Builder
 {
-
     // Instance Properties
     // ###################
-    private $describe_root = null;
-    private $describe_stack = array();
-    private $current_test = null;
-
-    private $context = null;
-    private $name = null;
-
-    // Class Properties
-    // ################
-    private static $builder_stack = array();
-    private static $builders = array();
 
     /** @var array $method_map A simple mechanism to assist in method delegation. */
     private static $method_map = array(
-        'start'       => 'start',
+        'suite'       => 'suite',
+        'xsuite'      => 'suite',
+
         'describe'    => 'describe',
         'xdescribe'   => 'describe',
 
@@ -58,42 +51,6 @@ class Builder
         'xonceBefore' => 'onceAfter',
     );
 
-
-    public function __construct($name = '', TestContext $context = null)
-    {
-        $this->name = $name;
-        $this->context = $context ?: new TestContext();
-    }
-
-    public function context()
-    {
-        error_log(date('c').'|'.__FILE__.'|'.__LINE__.'|'.\Dumpling\Dumpling::d('sdfsdf'));
-        return $this->context;
-    }
-
-    public function getRootDescribe()
-    {
-        return $this->describe_root;
-    }
-
-    public function current()
-    {
-        if (count($this->describe_stack)) {
-            return end($this->describe_stack);
-        } else {
-            return null;
-        }
-    }
-
-    public function find($path)
-    {
-        if ($this->describe_root === null) {
-            throw new Exception("Cannot find without a describe block set.");
-        }
-
-        return $this->describe_root->find($path);
-    }
-
     // DSL Dispatch
     // ############
     //
@@ -108,61 +65,56 @@ class Builder
      * Begins a fluent expectation, currently using esperance. Invoked when the
      * test is run (as compared to constructed e.g. describe, before).
      */
-    public function expect($obj)
+    public static function expect($obj)
     {
-        return new \Esperance\Assertion($obj);
+        $expect_method = new ExpectMethod(InvocationContext::closestBlock(), function($ctx) use (&$obj) {
+            return new \Esperance\Assertion($obj);
+        });
+
+        return InvocationContext::invoke($expect_method, $expect_method->closestSuite());
     }
 
     // DSL Dispatch: Not delegated required.
     // #####################################
-    public function skip($message = '')
+    public static function skip($message = '')
     {
         throw new SkippedException($message);
     }
 
-    // DSL Dispatch: Delegated to $this->current()
-    // ###########################################
-
     /**
      * Creates a new Describe block. The closure is invoked immediately.
      */
-    public function describe($description, $description_closure)
+    public static function describe($description, $description_closure)
     {
         $next = new Describe(
-            $this->current(),
+            InvocationContext::closestDescribe(),
             $description_closure,
             $description
         );
 
-        if ($this->current()) {
-            // We're in a nested describe block.
-            $this->current()->addDescribe($next);
-        } else {
-            // We assume only one top-level describe per builder.
-            if ($this->describe_root !== null) {
-                throw new Exception(
-                    "Defining a second, top-level describe block."
-                );
-            }
-            // We've just defined the top-level describe block.
-            $this->describe_root = $next;
-        }
+        InvocationContext::closestDescribe()->addDescribe($next);
 
-        $this->describe_stack[] = $next;
+        return InvocationContext::invoke($next, InvocationContext::closestSuite());
+    }
 
-        $description_closure($this->context);
-
-        return array_pop($this->describe_stack);
+    /**
+     * Creates a new Describe block. The closure is invoked immediately.
+     */
+    public static function suite($name, $fn)
+    {
+        $suite = Suite::factory($fn, $name);
+        InvocationContext::invoke($suite, $suite);
+        return $suite;
     }
 
     /**
      * Declares a new TestMethod and adds it to the current Describe block.
      */
-    public function it()
+    public static function it()
     {
         return call_user_func_array(
             array(
-                $this->current(),
+                InvocationContext::closestDescribe(),
                 'addTest'
             ),
             func_get_args()
@@ -172,11 +124,14 @@ class Builder
     /**
      * Everything else, including methods skipped via the dsl (e.g. xit).
      */
-    public function __call($dsl_name, $arguments)
+    public static function __callStatic($dsl_method_name, $arguments)
     {
-        list($name, $skip) = $this->getNameAndSkipFlag($dsl_name);
+        list($name, $skip) = self::getNameAndSkipFlag($dsl_method_name);
 
-        $result = call_user_func_array(array($this->current(), $name), $arguments);
+        $result = call_user_func_array(
+            array(InvocationContext::closestDescribe(), $name),
+            $arguments
+        );
 
         if ($skip === true && $result instanceof Block) {
             $result->skip('Skipped because method was prefixed by `x`');
@@ -200,57 +155,12 @@ class Builder
      *
      * @return a 2-tuple of a method name and skip flag.
      */
-    protected function getNameAndSkipFlag($name)
+    protected static function getNameAndSkipFlag($name)
     {
         if ($name[0] == 'x') {
             return array(self::$method_map[$name], true);
         } else {
             return array(self::$method_map[$name], false);
         }
-    }
-
-    // Builder Selection and Activation
-    // ################################
-
-    /**
-     * A kinda sorta context manager as in Python. Invokes $fn with this Builder
-     * pushed onto our Builder stack.
-     */
-    public function with($fn)
-    {
-        static::pushBuilder($this);
-        $result = $fn();
-        static::popBuilder();
-        return $result;
-    }
-
-    public static function getBuilder($builder_name)
-    {
-        return static::$builders[$builder_name];
-    }
-
-    public static function registerBuilder(Builder $builder)
-    {
-        if (isset(static::$builders[$builder->name()])) {
-            throw new Exception("Builder with name {$builder->name()} already exists");
-        }
-
-        static::$builders[$builder->name()] = $builder;
-    }
-
-    public static function getActiveBuilder()
-    {
-        return end(static::$builder_stack);
-    }
-
-    public static function pushBuilder($builder)
-    {
-        static::$builder_stack[] = $builder;
-        return $builder;
-    }
-
-    public static function popBuilder()
-    {
-        return array_pop(static::$builder_stack);
     }
 }

@@ -13,7 +13,8 @@ use Matura\Core\TestContext;
 use Matura\Core\TestRunner;
 use Matura\Core\ResultSet;
 use Matura\Core\ErrorHandler;
-use Matura\Core\Builder;
+
+use Matura\Blocks\Suite;
 
 use Matura\Events\Listener;
 use Matura\Matura;
@@ -104,14 +105,12 @@ class Test extends Command implements Listener
 
         set_error_handler(array($error_handler, 'handleError'));
 
-        $builder = Matura::buildFile(
-            $path,
-            new Builder('default', new TestContext())
-        );
+        require_once __DIR__ . '/../../functions.php';
+
+        require $path;
 
         $results = $test_runner->run(
-            $builder,
-            new TestContext(),
+            Suite::getLastSuite(),
             new ResultSet()
         );
 

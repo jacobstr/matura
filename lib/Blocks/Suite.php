@@ -5,9 +5,56 @@ use Matura\Blocks\Methods\HookMethod;
 
 class Suite extends Describe
 {
-    public function __construct(Block $parent_block = null, $fn = null, $name = null, TestContext $context = null)
+    /** @var Arbitrary properties are set here. */
+    protected $context = array();
+
+    protected static $suites = array();
+
+    public function __construct()
     {
-        parent::__construct($parent_block, $fn, $name, $context);
-        $this->context = $context ?: new TestContext();
+        call_user_func_array(array('parent','__construct'), func_get_args());
+    }
+
+    // Suite Selection and Activation
+    // ################################
+
+    public static function getSuite($suite_name)
+    {
+        return static::$suites[$suite_name];
+    }
+
+    public static function registerSuite(Suite $suite)
+    {
+        if (isset(static::$suites[$suite->name()])) {
+            throw new Exception("Suite with name {$suite->name()} already exists");
+        }
+
+        static::$suites[$suite->name()] = $suite;
+    }
+
+    public static function getLastSuite()
+    {
+        return end(static::$suites);
+    }
+
+    public static function factory($name, $fn)
+    {
+        $suite = new self(null, $name, $fn);
+        self::registerSuite($suite);
+
+        return $suite;
+    }
+
+    // Test Context via Magic Properties
+    // #################################
+
+    public function __get($name)
+    {
+        return $this->context[$name];
+    }
+
+    public function __set($name, $value)
+    {
+        $this->context[$name] = $value;
     }
 }
