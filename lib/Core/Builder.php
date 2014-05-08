@@ -3,10 +3,16 @@
 use Matura\Exceptions\Exception;
 use Matura\Exceptions\SkippedException;
 
-use Matura\Blocks\Methods\ExpectMethod;
 use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Blocks\Block;
+
+use Matura\Blocks\Methods\ExpectMethod;
+use Matura\Blocks\Methods\TestMethod;
+use Matura\Blocks\Methods\BeforeHook;
+use Matura\Blocks\Methods\OnceBeforeHook;
+use Matura\Blocks\Methods\AfterHook;
+use Matura\Blocks\Methods\OnceAfterHook;
 
 /**
  * Enables the callback based sugar api to work the way it does. It maintains
@@ -21,61 +27,34 @@ use Matura\Blocks\Block;
  *    object graph that represents a file's tests.
  *  - Potentially maps user-friendly DSL parameters to more pedantic class and
  *    function arguments used internally.
+ *
+ *
+ * Some pains have been taken to maintain
  */
 class Builder
 {
-    // Instance Properties
-    // ###################
-
-    /** @var array $method_map A simple mechanism to assist in method delegation. */
-    private static $method_map = array(
-        'suite'       => 'suite',
-        'xsuite'      => 'suite',
-
-        'describe'    => 'describe',
-        'xdescribe'   => 'describe',
-
-        'xit'         => 'addTest',
-        'it'          => 'addTest',
-
-        'before'      => 'before',
-        'xbefore'     => 'before',
-
-        'after'       => 'after',
-        'xafter'      => 'after',
-
-        'onceBefore'  => 'onceBefore',
-        'xonceBefore' => 'onceBefore',
-
-        'onceAfter'   => 'onceAfter',
-        'xonceBefore' => 'onceAfter',
-    );
-
     // DSL Dispatch
     // ############
     //
     // The global functions defined in functions.inc.php delegate to
     // corresponding methods in the builder object.
 
-
-    // DSL Dispatch: Delegated To $this->current_test
-    // ##############################################
-
     /**
-     * Begins a fluent expectation, currently using esperance. Invoked when the
-     * test is run (as compared to constructed e.g. describe, before).
+     * Begins a fluent expectation using esperance. Invoked when the test is run
+     * (as compared to constructed e.g. describe, before).
      */
     public static function expect($obj)
     {
-        $expect_method = new ExpectMethod(InvocationContext::closestBlock(), function($ctx) use (&$obj) {
+        $expect_method = new ExpectMethod(null, function ($ctx) use (&$obj) {
             return new \Esperance\Assertion($obj);
         });
-
-        return InvocationContext::invoke($expect_method, $expect_method->closestSuite());
+        $expect_method->closestTest()->addAssertion();
+        return $expect_method->invoke();
     }
 
-    // DSL Dispatch: Not delegated required.
-    // #####################################
+    /**
+     * Skips the test.
+     */
     public static function skip($message = '')
     {
         throw new SkippedException($message);
@@ -84,17 +63,12 @@ class Builder
     /**
      * Creates a new Describe block. The closure is invoked immediately.
      */
-    public static function describe($description, $description_closure)
+    public static function describe($name, $fn)
     {
-        $next = new Describe(
-            InvocationContext::closestDescribe(),
-            $description_closure,
-            $description
-        );
-
-        InvocationContext::closestDescribe()->addDescribe($next);
-
-        return InvocationContext::invoke($next, InvocationContext::closestSuite());
+        $next = new Describe(null, $fn, $name);
+        $next->addToParent();
+        $next->invoke();
+        return $next;
     }
 
     /**
@@ -102,39 +76,60 @@ class Builder
      */
     public static function suite($name, $fn)
     {
-        $suite = Suite::factory($fn, $name);
-        InvocationContext::invoke($suite, $suite);
+        $suite = new Suite(null, $fn, $name);
+        $suite->invoke();
         return $suite;
     }
 
     /**
      * Declares a new TestMethod and adds it to the current Describe block.
      */
-    public static function it()
+    public static function it($name, $fn)
     {
-        return call_user_func_array(
-            array(
-                InvocationContext::closestDescribe(),
-                'addTest'
-            ),
-            func_get_args()
-        );
+        $test_method = new TestMethod(null, $fn, $name);
+        $test_method->addToParent();
+        return $test_method;
+    }
+
+    public static function before($fn)
+    {
+        $test_method = new BeforeHook(null, $fn);
+        $test_method->addToParent();
+        return $test_method;
+    }
+
+    public static function onceBefore($fn)
+    {
+        $test_method = new OnceBeforeHook(null, $fn);
+        $test_method->addToParent();
+        return $test_method;
+    }
+
+    public static function after($fn)
+    {
+        $test_method = new AfterHook(null, $fn);
+        $test_method->addToParent();
+        return $test_method;
+    }
+
+    public static function onceAfter($fn)
+    {
+        $test_method = new OnceAfterHook(null, $fn);
+        $test_method->addToParent();
+        return $test_method;
     }
 
     /**
-     * Everything else, including methods skipped via the dsl (e.g. xit).
+     * Takes care of our 'x' flag to skip any of the above methods.
      */
-    public static function __callStatic($dsl_method_name, $arguments)
+    public static function __callStatic($name, $arguments)
     {
-        list($name, $skip) = self::getNameAndSkipFlag($dsl_method_name);
+        list($name, $skip) = self::getNameAndSkipFlag($name);
 
-        $result = call_user_func_array(
-            array(InvocationContext::closestDescribe(), $name),
-            $arguments
-        );
+        $result = call_user_func_array(array('static', $name), $arguments);
 
         if ($skip === true && $result instanceof Block) {
-            $result->skip('Skipped because method was prefixed by `x`');
+            $result->skip('Skipped because method was x-prefixed');
         }
 
         return $result;
@@ -158,7 +153,7 @@ class Builder
     protected static function getNameAndSkipFlag($name)
     {
         if ($name[0] == 'x') {
-            return array(self::$method_map[$name], true);
+            return array(substr($name, 1), true);
         } else {
             return array(self::$method_map[$name], false);
         }

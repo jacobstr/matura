@@ -12,14 +12,14 @@ use Matura\Blocks\Methods\HookMethod;
 class Describe extends Block
 {
 
-    protected $tests = array();
-    protected $describes = array();
-
-    protected $onceBefores = array();
-    protected $befores = array();
-
-    protected $onceAfters = array();
-    protected $afters = array();
+    protected $children = array(
+        'Matura\Blocks\Describe' => array(),
+        'Matura\Blocks\Methods\TestMethod' => array(),
+        'Matura\Blocks\Methods\AfterHook' => array(),
+        'Matura\Blocks\Methods\BeforeHook' => array(),
+        'Matura\Blocks\Methods\OnceAfterHook' => array(),
+        'Matura\Blocks\Methods\OnceBeforeHook' => array()
+    );
 
     /**
      * Finds a single TestMethod or Block with a given Path. We will return
@@ -36,14 +36,13 @@ class Describe extends Block
             return $this;
         }
 
-        foreach ($this->tests as $test) {
+        foreach ($this->tests() as $test) {
             if ($test->path() == $path) {
                 return $test;
             }
         }
-
-        foreach ($this->describes as $describe) {
-            $found = $describe->find($path);
+        foreach ($this->describes() as $block) {
+            $found = $block->find($path);
             if ($found !== null) {
                 return $found;
             }
@@ -66,39 +65,38 @@ class Describe extends Block
     {
         $result = array();
 
-        foreach ($this->tests as $test) {
+        foreach ($this->tests() as $test) {
             $result[] = $test;
         }
 
-        foreach ($this->describes as $describe) {
+        foreach ($this->describes() as $describe) {
             $result = array_merge($result, $describe->collectTests());
         }
 
         return $result;
     }
 
-    /**
-     * @var string $name The name of the newly added TestMethod.
-     * @var Callable $fn The callback body for the TestMethod.
-     *
-     * @return TestMethod The resulting TestMethod.
-     */
-    public function addTest($name, $fn)
+    public function addChild(Block $block)
     {
-        $this->tests[] = $test = new TestMethod($this, $fn, $name);
-
-        return $test;
+        $block_class = get_class($block);
+        if (!isset($this->children[$block_class])) {
+            $this->children[$block_class] = array();
+        }
+        $this->children[$block_class][] = $block;
     }
 
-    /**
-     * @var Describe $describe The nested Describe.
-     *
-     * @return null
-     */
-    public function addDescribe(Describe $describe)
+    public function children()
     {
-        $this->describes[] = $describe;
-        return null;
+        $result = array();
+        foreach ($this->children as $category) {
+            $result = array_merge($result, $category);
+        }
+        return $result;
+    }
+
+    public function tests()
+    {
+        return $this->children['Matura\Blocks\Methods\TestMethod'];
     }
 
     /**
@@ -106,28 +104,7 @@ class Describe extends Block
      */
     public function describes()
     {
-        return $this->describes;
-    }
-
-    // Nested Hooks
-    // ############
-    //
-    // These are a speciality of the Describe blocks currently. They could very
-    // well exist in the Block superclass but I'd rather be conservative with
-    // that until use cases demand.
-
-    /**
-     * Adds a new after hook. Generally, to be run after every descendant
-     * TestMethod.
-     *
-     * @param $fn A Callable that will be wrapped up as a new HookMethod.
-     *
-     * @return HookMethod The HookMethod created.
-     */
-    public function after($fn)
-    {
-        $this->afters[] = $result = new HookMethod($this, $fn, 'after');
-        return $result;
+        return $this->children['Matura\Blocks\Describe'];
     }
 
     /**
@@ -135,21 +112,7 @@ class Describe extends Block
      */
     public function afters()
     {
-        return $this->afters;
-    }
-
-    /**
-     * Adds a new `before` hook. Generally, to be run before every descendant
-     * TestMethod.
-     *
-     * @param $fn A Callable that will be wrapped up as a new HookMethod.
-     *
-     * @return HookMethod The HookMethod created.
-     */
-    public function before($fn)
-    {
-        $this->befores[] = $result = new HookMethod($this, $fn, 'before');
-        return $result;
+        return $this->children['Matura\Blocks\Methods\AfterHook'];
     }
 
     /**
@@ -157,22 +120,7 @@ class Describe extends Block
      */
     public function befores()
     {
-        return $this->befores;
-    }
-
-    /**
-     * Adds a new `onceBefore` hook. Generally, to be run once when a descendant
-     * TestMethod is invoked.
-     *
-     * @param $fn A Callable that will be wrapped up as a new HookMethod.
-     *
-     * @return HookMethod The HookMethod created.
-     */
-    public function onceBefore($fn)
-    {
-        $this->onceBefores[] = $result = new HookMethod($this, $fn, 'onceBefore');
-
-        return $result;
+        return $this->children['Matura\Blocks\Methods\BeforeHook'];
     }
 
     /**
@@ -180,21 +128,7 @@ class Describe extends Block
      */
     public function onceBefores()
     {
-        return $this->onceBefores;
-    }
-
-    /**
-     * Adds a new `onceAfter` hook. Generally, to be run once when any descendant
-     * TestMethod is invoked.
-     *
-     * @param $fn A Callable that will be wrapped up as a new HookMethod.
-     *
-     * @return HookMethod The HookMethod created.
-     */
-    public function onceAfter($fn)
-    {
-        $this->onceAfters[] = new HookMethod($this, $fn, 'onceAfter');
-        return $this;
+        return $this->children['Matura\Blocks\Methods\OnceBeforeHook'];
     }
 
     /**
@@ -202,6 +136,6 @@ class Describe extends Block
      */
     public function onceAfters()
     {
-        return $this->onceAfters;
+        return $this->children['Matura\Blocks\Methods\OnceAfterHook'];
     }
 }

@@ -59,7 +59,7 @@ class TestRunner implements Emitter
 
         try {
             $return_value = $test->traverseMethods(function ($hook_or_test) use ($suite) {
-                InvocationContext::invoke($hook_or_test, $suite);
+                $hook_or_test->invoke();
             });
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {

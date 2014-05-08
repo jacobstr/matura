@@ -13,6 +13,7 @@ class Suite extends Describe
     public function __construct()
     {
         call_user_func_array(array('parent','__construct'), func_get_args());
+        self::registerSuite($this);
     }
 
     // Suite Selection and Activation
@@ -35,14 +36,6 @@ class Suite extends Describe
     public static function getLastSuite()
     {
         return end(static::$suites);
-    }
-
-    public static function factory($name, $fn)
-    {
-        $suite = new self(null, $name, $fn);
-        self::registerSuite($suite);
-
-        return $suite;
     }
 
     // Test Context via Magic Properties

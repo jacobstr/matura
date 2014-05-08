@@ -28,8 +28,8 @@ class InvocationContext
 
     public static function stackGrepClass($name)
     {
-        foreach(array_reverse(self::$stack) as $block) {
-            if(is_a($block, $name)) {
+        foreach (array_reverse(self::$stack) as $block) {
+            if (is_a($block, $name)) {
                 return $block;
             }
         }
@@ -45,5 +45,20 @@ class InvocationContext
         array_pop(self::$stack);
 
         return $result;
+    }
+
+    public static function push(Block $block)
+    {
+        self::$stack[] = $block;
+    }
+
+    public static function pop(Block $block)
+    {
+        array_pop(self::$stack);
+    }
+
+    public static function activeBlock()
+    {
+        return end(self::$stack) ?: null;
     }
 }

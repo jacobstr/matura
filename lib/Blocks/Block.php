@@ -32,7 +32,7 @@ abstract class Block
 
     public function __construct(Block $parent_block = null, $fn = null, $name = null)
     {
-        $this->parent_block = $parent_block;
+        $this->parent_block = $parent_block ?: InvocationContext::activeBlock();
         $this->fn = $fn;
         $this->name = $name;
     }
@@ -60,7 +60,7 @@ abstract class Block
         return $this->skipped;
     }
 
-    public function invoke(Suite $suite)
+    public function invoke()
     {
         if ($this->isSkipped()) {
             throw new SkippedException($this->skipped_because);
@@ -68,10 +68,14 @@ abstract class Block
 
         $this->invoked = true;
 
-        return call_user_func($this->fn, $suite);
+        InvocationContext::push($this);
+        $result = call_user_func($this->fn, $this->closestSuite());
+        InvocationContext::pop($this);
+
+        return $result;
     }
 
-    public function addAssertion($obj)
+    public function addAssertion()
     {
         $this->assertions++;
     }
@@ -113,16 +117,6 @@ abstract class Block
     // Traversal
     // #########
 
-    public function closestSuite()
-    {
-        foreach($this->ancestors() as $ancestor) {
-            if(is_a($ancestor, '\Matura\Blocks\Suite')) {
-                return $ancestor;
-            }
-        }
-        return null;
-    }
-
     public function ancestors()
     {
         $ancestors = array();
@@ -146,6 +140,13 @@ abstract class Block
         }
     }
 
+    public function addToParent()
+    {
+        if ($this->parent_block) {
+            $this->parent_block->addChild($this);
+        }
+    }
+
     public function traversePost($fn)
     {
         if ($parent_block = $this->parentBlock()) {
@@ -166,13 +167,28 @@ abstract class Block
 
     // Invocation Stack
 
-    protected static function closestDescribe()
+    public static function closestDescribe()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Describe');
+        return $this->stackGrepClass('Matura\Blocks\Describe');
     }
 
-    protected function closestTest()
+    public function closestTest()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Methods\TestMethod');
+        foreach ($this->ancestors() as $ancestor) {
+            if (is_a($ancestor, '\Matura\Blocks\Methods\TestMethod')) {
+                return $ancestor;
+            }
+        }
+        return null;
+    }
+
+    public function closestSuite()
+    {
+        foreach ($this->ancestors() as $ancestor) {
+            if (is_a($ancestor, '\Matura\Blocks\Suite')) {
+                return $ancestor;
+            }
+        }
+        return null;
     }
 }
