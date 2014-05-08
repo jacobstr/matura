@@ -19,10 +19,7 @@ class Printer
     public function __construct($options = array())
     {
         $this->options = array_merge(static::$default_options, $options);
-    }
 
-    public function render($template, $context)
-    {
         $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../templates');
 
         $twig = new Twig_Environment($loader, array(
@@ -50,8 +47,12 @@ class Printer
             }
         ));
 
+        $this->twig = $twig;
+    }
 
-        return $twig->render($template, $context);
+    public function render($template, $context)
+    {
+        return $this->twig->render($template, $context);
     }
 
     public function renderResult(Result $result, ResultSet $result_set)

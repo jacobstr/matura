@@ -6,6 +6,8 @@ class InvocationContext
 {
     public static $stack = array();
 
+    public static $total_invocations = 0;
+
     public static function closestSuite()
     {
         return self::stackGrepClass('\Matura\Blocks\Suite');
@@ -39,6 +41,7 @@ class InvocationContext
 
     public static function invoke(Block $block)
     {
+        self::$total_invocations++;
         $args = array_slice(func_get_args(), 1);
         self::$stack[] = $block;
         $result = call_user_func_array(array($block,'invoke'), $args);
