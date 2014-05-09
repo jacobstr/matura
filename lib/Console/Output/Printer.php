@@ -2,6 +2,7 @@
 
 use Matura\Core\Result;
 use Matura\Core\ResultSet;
+use Matura\Blocks\Suite;
 use Matura\Exceptions\Exception as MaturaException;
 
 use Twig_Loader_Filesystem;
@@ -88,6 +89,16 @@ class Printer
         );
 
         return $this->render('summary.txt', $context);
+    }
+
+    public function renderStart(Suite $suite, ResultSet $result_set)
+    {
+        $context = array(
+            'suite' => $suite,
+            'result_set' => $result_set,
+        );
+
+        return $this->render('test_start.txt', $context);
     }
 
     public function formatTrace(MaturaException $exception)

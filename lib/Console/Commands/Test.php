@@ -102,41 +102,16 @@ class Test extends Command implements Listener
         $this->output = $output;
         $this->printer = $printer;
 
-        $test_runner = new TestRunner();
-        $test_runner->addListener($this);
-
         // Bootstrap and Run
         // #################
 
-        $error_handler = new ErrorHandler();
+        $test_runner = new TestRunner($path, array(
+            'filter' => $filter
+        ));
 
-        set_error_handler(array($error_handler, 'handleError'));
+        $test_runner->addListener($this);
 
-        require_once __DIR__ . '/../../functions.php';
-
-        if (is_dir($path)) {
-            $directory = new \RecursiveDirectoryIterator($path);
-            $iterator = new \RecursiveIteratorIterator($directory);
-            $tests = new \RegexIterator($iterator, '/.*test.*php/');
-        } else {
-            $tests = array($path);
-        }
-
-        $result_set = new ResultSet();
-
-        foreach($tests as $test) {
-            Suite::clear();
-            require $test;
-            $test_runner->runSuite( Suite::getLastSuite(), $result_set);
-        }
-
-        $this->output->writeln(
-            $this->printer->renderSummary($result_set)
-        );
-
-        restore_error_handler();
-
-        return $result_set->exitCode();
+        return $test_runner->run()->exitCode();
     }
 
     public function onMaturaEvent($name, $args)
@@ -144,6 +119,14 @@ class Test extends Command implements Listener
         if ($name === 'test.complete') {
             $this->output->writeln(
                 $this->printer->renderResult($args[0], $args[1])
+            );
+        } elseif ($name === 'test_suite.start') {
+            $this->output->writeln(
+                $this->printer->renderStart($args[0], $args[1])
+            );
+        } elseif ($name === 'test_run.complete') {
+            $this->output->writeln(
+                $this->printer->renderSummary($args[0])
             );
         }
     }

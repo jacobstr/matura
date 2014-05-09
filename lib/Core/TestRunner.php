@@ -23,6 +23,28 @@ class TestRunner implements Emitter
     protected $result_set = null;
     protected $listeners = array();
 
+    protected $options = array(
+        'filter' => '.*'
+    );
+
+    protected $path;
+
+    public function __construct($path, $options = array()) {
+        $this->path = $path;
+        $this->options = array_merge($this->options, $options);
+    }
+
+    public function collectFiles()
+    {
+        if (is_dir($this->path)) {
+            $directory = new \RecursiveDirectoryIterator($this->path);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            return new \RegexIterator($iterator, '/.*test.*php/');
+        } else {
+            return array($this->path);
+        }
+    }
+
     public function addListener(Listener $listener)
     {
         $this->listeners[] = $listener;
@@ -35,12 +57,37 @@ class TestRunner implements Emitter
         }
     }
 
+    public function run()
+    {
+        $error_handler = new ErrorHandler();
+
+        set_error_handler(array($error_handler, 'handleError'));
+
+        require_once __DIR__ . '/../functions.php';
+
+        $result_set = new ResultSet();
+
+        $tests = $this->collectFiles();
+
+        foreach($tests as $test) {
+            Suite::clear();
+            require $test;
+            $this->runSuite(Suite::getLastSuite(), $result_set);
+        }
+
+        restore_error_handler();
+
+        $this->emit('test_run.complete', array($result_set));
+
+        return $result_set;
+    }
+
     public function runSuite(
         Suite $suite,
         ResultSet $result_set
     ) {
 
-        $this->emit('test_suite.start', array($result_set));
+        $this->emit('test_suite.start', array($suite, $result_set));
 
         $tests = $suite->collectTests();
 
@@ -48,7 +95,7 @@ class TestRunner implements Emitter
             $result_set->addResult($this->runTest($suite, $test, $result_set));
         }
 
-        $this->emit('test_suite.complete', array($result_set));
+        $this->emit('test_suite.complete', array($suite, $result_set));
 
         return $result_set;
     }
