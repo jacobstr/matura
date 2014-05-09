@@ -23,6 +23,6 @@ class ErrorHandler
 
         $error_class = $this->error_class;
 
-        throw new $error_class($errno, $errstr, $errfile, $errline);
+        throw new $error_class($errno, $errstr, $errfile, $errline, debug_backtrace());
     }
 }

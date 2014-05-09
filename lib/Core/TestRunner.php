@@ -35,10 +35,12 @@ class TestRunner implements Emitter
         }
     }
 
-    public function run(
+    public function runSuite(
         Suite $suite,
         ResultSet $result_set
     ) {
+
+        $this->emit('test_suite.start', array($result_set));
 
         $tests = $suite->collectTests();
 
@@ -46,7 +48,7 @@ class TestRunner implements Emitter
             $result_set->addResult($this->runTest($suite, $test, $result_set));
         }
 
-        $this->emit('test_set.complete', array($result_set));
+        $this->emit('test_suite.complete', array($result_set));
 
         return $result_set;
     }

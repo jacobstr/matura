@@ -30,15 +30,17 @@ class Error extends Exception
     protected $errstr;
     protected $errfile;
     protected $errline;
+    protected $backtrace;
 
-    public function __construct($errno, $errstr, $errfile, $errline)
+    public function __construct($errno, $errstr, $errfile, $errline, $backtrace)
     {
-        $this->errno   = $errno;
-        $this->errstr   = $errstr;
-        $this->errfile = $errfile;
-        $this->errline = $errline;
+        $this->errno     = $errno;
+        $this->errstr    = $errstr;
+        $this->errfile   = $errfile;
+        $this->errline   = $errline;
+        $this->backtrace = $backtrace;
 
-        $this->message = $this->errstr;
+        $this->message = $this->errstr . ' via '.$errfile.':'.$errline;
     }
 
     public function getCategory()
@@ -48,9 +50,6 @@ class Error extends Exception
 
     public function originalTrace()
     {
-        return array(array(
-            'file' => $this->errfile,
-            'line' => $this->errline
-        ));
+        return $this->backtrace;
     }
 }

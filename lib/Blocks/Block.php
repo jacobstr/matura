@@ -69,8 +69,13 @@ abstract class Block
         $this->invoked = true;
 
         InvocationContext::push($this);
-        $result = call_user_func($this->fn, $this->closestSuite());
-        InvocationContext::pop($this);
+        try {
+            $result = call_user_func($this->fn, $this->closestSuite());
+            InvocationContext::pop($this);
+        } catch(\Exception $e) {
+            InvocationContext::pop($this);
+            throw $e;
+        }
 
         return $result;
     }
@@ -101,17 +106,9 @@ abstract class Block
         return $res;
     }
 
-    // Fluent Accessors
-    // ################
-
-    public function name($name = null)
+    public function name()
     {
-        if (func_num_args()) {
-            $this->name = $name;
-            return $this;
-        } else {
-            return $this->name;
-        }
+        return $this->name;
     }
 
     // Traversal
@@ -165,30 +162,22 @@ abstract class Block
         }
     }
 
-    // Invocation Stack
-
-    public static function closestDescribe()
-    {
-        return $this->stackGrepClass('Matura\Blocks\Describe');
+    public function closest($class_name) {
+        foreach ($this->ancestors() as $ancestor) {
+            if (is_a($ancestor, $class_name)) {
+                return $ancestor;
+            }
+        }
+        return null;
     }
 
     public function closestTest()
     {
-        foreach ($this->ancestors() as $ancestor) {
-            if (is_a($ancestor, '\Matura\Blocks\Methods\TestMethod')) {
-                return $ancestor;
-            }
-        }
-        return null;
+        return $this->closest('\Matura\Blocks\Methods\TestMethod');
     }
 
     public function closestSuite()
     {
-        foreach ($this->ancestors() as $ancestor) {
-            if (is_a($ancestor, '\Matura\Blocks\Suite')) {
-                return $ancestor;
-            }
-        }
-        return null;
+        return $this->closest('\Matura\Blocks\Suite');
     }
 }

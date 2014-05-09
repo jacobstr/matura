@@ -32,18 +32,23 @@ class Test extends Command implements Listener
                 'The path to the file or directory to test.'
             )
             ->addOption(
+                'grep',
+                'g',
+                InputOption::VALUE_OPTIONAL,
+                'Filter individual test cases by a description regexp.'
+            )
+            ->addOption(
                 'filter',
-                null,
-                InputOption::VALUE_NONE,
-                'Run only tests matching specified regular expression.'
+                'f',
+                InputOption::VALUE_OPTIONAL,
+                'Filter test files by a filename regexp.'
             )
             ->addOption(
                 'trace_depth',
                 'd',
                 InputOption::VALUE_OPTIONAL,
-                'Set maximum length of back traces.'
-            )
-        ;
+                'Set the depth of printed stack traces.'
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -87,6 +92,8 @@ class Test extends Command implements Listener
             'trace_depth' => $input->getOption('trace_depth') ?: 7
         );
 
+        $filter = $input->getOption('filter') ?: '/.*/i';
+
         // Configure Output Modules
         // ########################
         $printer = new Printer($printer_options);
@@ -107,25 +114,34 @@ class Test extends Command implements Listener
 
         require_once __DIR__ . '/../../functions.php';
 
-        require $path;
+        if (is_dir($path)) {
+            $directory = new \RecursiveDirectoryIterator($path);
+            $iterator = new \RecursiveIteratorIterator($directory);
+            $tests = new \RegexIterator($iterator, '/.*test.*php/');
+        } else {
+            $tests = array($path);
+        }
 
-        $results = $test_runner->run(
-            Suite::getLastSuite(),
-            new ResultSet()
+        $result_set = new ResultSet();
+
+        foreach($tests as $test) {
+            Suite::clear();
+            require $test;
+            $test_runner->runSuite( Suite::getLastSuite(), $result_set);
+        }
+
+        $this->output->writeln(
+            $this->printer->renderSummary($result_set)
         );
 
         restore_error_handler();
 
-        return $results->exitCode();
+        return $result_set->exitCode();
     }
 
     public function onMaturaEvent($name, $args)
     {
-        if ($name === 'test_set.complete') {
-            $this->output->writeln(
-                $this->printer->renderSummary($args[0])
-            );
-        } elseif ($name === 'test.complete') {
+        if ($name === 'test.complete') {
             $this->output->writeln(
                 $this->printer->renderResult($args[0], $args[1])
             );

@@ -38,6 +38,11 @@ class Suite extends Describe
         return end(static::$suites);
     }
 
+    public static function clear()
+    {
+        static::$suites = array();
+    }
+
     // Test Context via Magic Properties
     // #################################
 

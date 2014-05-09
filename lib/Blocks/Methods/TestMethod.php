@@ -29,7 +29,7 @@ class TestMethod extends Method
      */
     public function traverseMethods($cb)
     {
-        if (! $this->parent_block instanceof Describe) {
+        if (!$this->parent_block instanceof Describe) {
             throw new Exception($this->path().' was not created in a Describe block.');
         }
 
