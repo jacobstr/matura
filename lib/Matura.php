@@ -89,6 +89,23 @@ EOD;
         return $final_code;
     }
 
+    public static function loadDSL()
+    {
+        require_once __DIR__ . '/functions.php';
+    }
+
+    public static function init()
+    {
+        $error_handler = new ErrorHandler();
+        set_error_handler(array($error_handler, 'handleError'));
+        static::loadDSL();
+    }
+
+    public static function cleanup()
+    {
+        restore_error_handler();
+    }
+
     public static function dynamicDSL($target_namespace = '', $method_prefix = '')
     {
         $source_code = static::generateDSL($target_namespace, $method_prefix);

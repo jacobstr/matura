@@ -1,7 +1,9 @@
 <?php namespace Matura\Test\SelfHosted;
 
-// Keeping PSR-2 Happy.
-$gensuite = function ($depth, $tests_per_level, $before_per_level) use (&$gensuite) {
+/**
+ * Recursively constructs a test Suite.
+ */
+$gensuite = function ($depth, $tests_per_level, $befores_per_level) use (&$gensuite) {
     if ($depth == 0) {
         return;
     }
@@ -9,7 +11,7 @@ $gensuite = function ($depth, $tests_per_level, $before_per_level) use (&$gensui
     describe("Level $depth", function ($ctx) use (
         $depth,
         $tests_per_level,
-        $before_per_level,
+        $befores_per_level,
         &$gensuite
     ) {
         for ($i = 0; $i < $tests_per_level; $i++) {
@@ -18,14 +20,14 @@ $gensuite = function ($depth, $tests_per_level, $before_per_level) use (&$gensui
             });
         }
 
-        for ($i = 0; $i < $before_per_level; $i++) {
+        for ($i = 0; $i < $befores_per_level; $i++) {
             before(function ($ctx) {
             });
         }
-        $gensuite($depth - 1, $tests_per_level, $before_per_level);
+        $gensuite($depth - 1, $tests_per_level, $befores_per_level);
     });
 };
 
-suite('Fixture', function ($ctx) use (&$gensuite) {
+xsuite('Fixture', function ($ctx) use (&$gensuite) {
     $gensuite(15, 25, 5);
 });

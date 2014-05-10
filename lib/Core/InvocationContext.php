@@ -1,36 +1,39 @@
 <?php namespace Matura\Core;
 
 use Matura\Blocks\Block;
+use Matura\Core\InvocationContext;
 
 class InvocationContext
 {
-    public static $stack = array();
+    public $stack = array();
 
-    public static $total_invocations = 0;
+    public $total_invocations = 0;
 
-    public static function closestSuite()
+    public static $active_invocation_context;
+
+    public function closestSuite()
     {
-        return self::stackGrepClass('\Matura\Blocks\Suite');
+        return $this->stackGrepClass('\Matura\Blocks\Suite');
     }
 
-    public static function closestDescribe()
+    public function closestDescribe()
     {
-        return self::stackGrepClass('\Matura\Blocks\Describe');
+        return $this->stackGrepClass('\Matura\Blocks\Describe');
     }
 
-    public static function closestTest()
+    public function closestTest()
     {
-        return self::stackGrepClass('\Matura\Blocks\Methods\TestMethod');
+        return $this->stackGrepClass('\Matura\Blocks\Methods\TestMethod');
     }
 
-    public static function closestBlock()
+    public function closestBlock()
     {
-        return self::stackGrepClass('\Matura\Blocks\Block');
+        return $this->stackGrepClass('\Matura\Blocks\Block');
     }
 
-    public static function stackGrepClass($name)
+    public function stackGrepClass($name)
     {
-        foreach (array_reverse(self::$stack) as $block) {
+        foreach (array_reverse($this->stack) as $block) {
             if (is_a($block, $name)) {
                 return $block;
             }
@@ -39,29 +42,39 @@ class InvocationContext
         return null;
     }
 
-    public static function invoke(Block $block)
+    public function invoke(Block $block)
     {
-        self::$total_invocations++;
+        $this->total_invocations++;
         $args = array_slice(func_get_args(), 1);
-        self::$stack[] = $block;
+        $this->stack[] = $block;
         $result = call_user_func_array(array($block,'invoke'), $args);
-        array_pop(self::$stack);
+        array_pop($this->stack);
 
         return $result;
     }
 
-    public static function push(Block $block)
+    public function push(Block $block)
     {
-        self::$stack[] = $block;
+        $this->stack[] = $block;
     }
 
-    public static function pop(Block $block)
+    public function pop()
     {
-        array_pop(self::$stack);
+        array_pop($this->stack);
     }
 
-    public static function activeBlock()
+    public function activeBlock()
     {
-        return end(self::$stack) ?: null;
+        return end($this->stack) ?: null;
+    }
+
+    public function activate()
+    {
+        static::$active_invocation_context = $this;
+    }
+
+    public static function getActive()
+    {
+        return static::$active_invocation_context;
     }
 }

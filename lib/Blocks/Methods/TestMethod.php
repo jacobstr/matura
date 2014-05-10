@@ -5,6 +5,13 @@ use Matura\Blocks\Describe;
 
 class TestMethod extends Method
 {
+    public function invokeAll()
+    {
+        return $this->traverseMethods(function($block) {
+            $block->invoke();
+        });
+    }
+
     /**
      * Traverses this TestMethod and it's hooks, passing along each TestMethod
      * in the order it is encountered to the provided $cb.

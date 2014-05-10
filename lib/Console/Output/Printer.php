@@ -9,17 +9,18 @@ use Twig_Loader_Filesystem;
 use Twig_Environment;
 use Twig_SimpleFilter;
 
+/**
+ * Contains test rendering methods.
+ */
 class Printer
 {
-    protected static $default_options = array(
+    protected $options = array(
         'trace_depth' => 7
     );
 
-    protected $options;
-
     public function __construct($options = array())
     {
-        $this->options = array_merge(static::$default_options, $options);
+        $this->options = array_merge($this->options, $options);
 
         $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../templates');
 
@@ -59,7 +60,9 @@ class Printer
     public function renderResult(Result $result, ResultSet $result_set)
     {
         $context = array(
-            'path'   => $result->getMethod()->path(),
+            // Trim the generally redundant suite name from the path by starting
+            // at an offset of 1 from the root of our Block hierarchy.
+            'path'   => $result->getMethod()->path(1),
             'status' => $result->getStatus(),
             'index'  => $result_set->totalTests() + 1
         );
@@ -98,7 +101,7 @@ class Printer
             'result_set' => $result_set,
         );
 
-        return $this->render('test_start.txt', $context);
+        return $this->render('test_suite_start.txt', $context);
     }
 
     public function formatTrace(MaturaException $exception)

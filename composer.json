@@ -1,6 +1,6 @@
 {
-    "name": "jacobstr/nandrolone",
-    "description": "Testing that should be outlawed.",
+    "name": "jacobstr/matura",
+    "description": "A mocha inspired testing framework for php.",
     "authors": [
         {
             "name": "jacobstr",
@@ -15,6 +15,12 @@
         "symfony/console": "dev-master",
         "twig/twig": "1.*"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/jacobstr/esperance.git"
+        }
+    ],
     "require-dev": {
         "phpunit/phpunit": "3.7.*"
     },

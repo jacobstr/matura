@@ -2,57 +2,25 @@
 
 use Matura\Blocks\Methods\TestMethod;
 use Matura\Blocks\Methods\HookMethod;
+use Matura\Exceptions\Exception;
 
+/**
+ * Meant as a top-level container - e.g. 1 per file. This is not enforced, simply
+ * discouraged.
+ */
 class Suite extends Describe
 {
-    /** @var Arbitrary properties are set here. */
-    protected $context = array();
-
-    protected static $suites = array();
-
-    public function __construct()
+    public function build()
     {
-        call_user_func_array(array('parent','__construct'), func_get_args());
-        self::registerSuite($this);
-    }
+        $builder_for = function($block)  use (&$builder_for) {
+            return function ($suite) use ($block, $builder_for) {
+                $block->invoke();
+                foreach($block->describes() as $describe) {
+                    $describe->invokeWithin($builder_for($describe));
+                }
+            };
+        };
 
-    // Suite Selection and Activation
-    // ################################
-
-    public static function getSuite($suite_name)
-    {
-        return static::$suites[$suite_name];
-    }
-
-    public static function registerSuite(Suite $suite)
-    {
-        if (isset(static::$suites[$suite->name()])) {
-            throw new Exception("Suite with name {$suite->name()} already exists");
-        }
-
-        static::$suites[$suite->name()] = $suite;
-    }
-
-    public static function getLastSuite()
-    {
-        return end(static::$suites);
-    }
-
-    public static function clear()
-    {
-        static::$suites = array();
-    }
-
-    // Test Context via Magic Properties
-    // #################################
-
-    public function __get($name)
-    {
-        return $this->context[$name];
-    }
-
-    public function __set($name, $value)
-    {
-        $this->context[$name] = $value;
+        return $this->invokeWithin($builder_for($this));
     }
 }

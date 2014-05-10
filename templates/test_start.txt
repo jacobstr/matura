@@ -1,2 +1,0 @@
-
-<bold>Beginning Test Suite {{ suite.path }}</bold>

@@ -1,13 +1,15 @@
 <?php namespace Matura\Core;
 
+use SplFileInfo;
+use Matura\Matura;
 use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Blocks\Methods\TestMethod;
 
+use Matura\Exceptions\Exception;
 use Matura\Exceptions\SkippedException;
 use Matura\Exceptions\AssertionException;
 
-use Matura\Core\TestContext;
 use Matura\Core\ResultSet;
 use Matura\Core\Result;
 
@@ -15,18 +17,22 @@ use Matura\Events\Listener;
 use Matura\Events\Emitter;
 
 use Esperance\Error as EsperanceError;
-
+/**
+ * Responsible for invoking files, Suites, and TestMethods.
+ *
+ * The test envirojnment is set up mostly in #run() where we register our
+ * error handler and load our DSL.
+ */
 class TestRunner implements Emitter
 {
-    protected $root_block = null;
-    protected $context = null;
-    protected $result_set = null;
     protected $listeners = array();
 
     protected $options = array(
-        'filter' => '.*'
+        'filter' => '//',
+        'grep' => '//'
     );
 
+    /** @var The directory or folder contain our test file(s). */
     protected $path;
 
     public function __construct($path, $options = array()) {
@@ -34,14 +40,20 @@ class TestRunner implements Emitter
         $this->options = array_merge($this->options, $options);
     }
 
+    /**
+     * Recursively obtains all test files under $this->path and returns
+     * the filtered result after applying our our filtering regex.
+     *
+     * @return \Iterator
+     */
     public function collectFiles()
     {
         if (is_dir($this->path)) {
-            $directory = new \RecursiveDirectoryIterator($this->path);
+            $directory = new \RecursiveDirectoryIterator($this->path, \FilesystemIterator::SKIP_DOTS );
             $iterator = new \RecursiveIteratorIterator($directory);
-            return new \RegexIterator($iterator, '/.*test.*php/');
+            return new \RegexIterator($iterator, $this->options['filter']);
         } else {
-            return array($this->path);
+            return new \ArrayIterator(array(new SplFileInfo($this->path)));
         }
     }
 
@@ -57,39 +69,52 @@ class TestRunner implements Emitter
         }
     }
 
+    /**
+     * Bootstraps parts of our test enviornment and iteratively invokes each
+     * file.
+     *
+     * @return ResultSet
+     */
     public function run()
     {
-        $error_handler = new ErrorHandler();
-
-        set_error_handler(array($error_handler, 'handleError'));
-
-        require_once __DIR__ . '/../functions.php';
+        // With 5.4 and the ability to bind a closure's context, this will be
+        // better off using a closure.
+        Matura::init();
 
         $result_set = new ResultSet();
 
         $tests = $this->collectFiles();
 
         foreach($tests as $test) {
-            Suite::clear();
-            require $test;
-            $this->runSuite(Suite::getLastSuite(), $result_set);
+            $suite = new Suite(
+                new InvocationContext(),
+                function ($suite) use ($test) {
+                    require $test;
+                },
+                $test->getRealPath()
+            );
+            $suite->build();
+            $this->runSuite($suite, $result_set);
         }
 
-        restore_error_handler();
-
         $this->emit('test_run.complete', array($result_set));
+
+        Matura::cleanup();
 
         return $result_set;
     }
 
-    public function runSuite(
+    /**
+     * Runs a test suite.
+     */
+    protected function runSuite(
         Suite $suite,
         ResultSet $result_set
     ) {
 
         $this->emit('test_suite.start', array($suite, $result_set));
 
-        $tests = $suite->collectTests();
+        $tests = $suite->collectTests($this->options['grep']);
 
         foreach ($tests as $test) {
             $result_set->addResult($this->runTest($suite, $test, $result_set));
@@ -100,7 +125,10 @@ class TestRunner implements Emitter
         return $result_set;
     }
 
-    public function runTest(Suite $suite, TestMethod $test, ResultSet $result_set = null)
+    /**
+     * Runs an individual test.
+     */
+    protected function runTest(Suite $suite, TestMethod $test, ResultSet $result_set = null)
     {
         $return_value = null;
 
@@ -119,7 +147,7 @@ class TestRunner implements Emitter
             $return_value = $e;
         } catch (\Exception $e) {
             $status = Result::FAILURE;
-            $return_value = $e;
+            $return_value = new Exception($e->getMessage(), $e->getCode(), $e);
         }
 
         $result = $this->buildResult($test, $status, $return_value);

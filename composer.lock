@@ -3,24 +3,25 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "ce728581c56c0811be60f45b307e99cd",
+    "hash": "2fdaf2c477300ba1e99f1278238c5acf",
     "packages": [
         {
             "name": "esperance/esperance",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/esperance/esperance.git",
-                "reference": "70c4dca34fd41efc2250e0aac6da2268b56d01f9"
+                "url": "https://github.com/jacobstr/esperance.git",
+                "reference": "e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/esperance/esperance/zipball/70c4dca34fd41efc2250e0aac6da2268b56d01f9",
-                "reference": "70c4dca34fd41efc2250e0aac6da2268b56d01f9",
+                "url": "https://api.github.com/repos/jacobstr/esperance/zipball/e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a",
+                "reference": "e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a",
                 "shasum": ""
             },
             "require": {
                 "evenement/evenement": "1.*",
+                "jacobstr/dumpling": "dev-master",
                 "php": ">=5.3.2"
             },
             "type": "library",
@@ -29,17 +30,19 @@
                     "Esperance": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "BDD style assertion library for PHP.",
             "keywords": [
-                "BDD",
-                "TDD",
-                "assertion"
+                "assertion",
+                "bdd",
+                "tdd"
             ],
-            "time": "2012-07-06 18:12:36"
+            "support": {
+                "source": "https://github.com/jacobstr/esperance/tree/master"
+            },
+            "time": "2014-05-09 08:42:09"
         },
         {
             "name": "evenement/evenement",
@@ -87,12 +90,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacobstr/dumpling.git",
-                "reference": "8252067e1e07fbf5971f4d6b52f092fd768134a9"
+                "reference": "b66da47438277f641cd570eb8e2079df0c07f2bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacobstr/dumpling/zipball/8252067e1e07fbf5971f4d6b52f092fd768134a9",
-                "reference": "8252067e1e07fbf5971f4d6b52f092fd768134a9",
+                "url": "https://api.github.com/repos/jacobstr/dumpling/zipball/b66da47438277f641cd570eb8e2079df0c07f2bb",
+                "reference": "b66da47438277f641cd570eb8e2079df0c07f2bb",
                 "shasum": ""
             },
             "require-dev": {
@@ -114,8 +117,8 @@
                     "email": "jacobstr@gmail.com"
                 }
             ],
-            "description": "Like print_r, but depth limited and cyclic dependency safe.",
-            "time": "2014-04-28 05:13:25"
+            "description": "Like print_r, but depth limited and cyclic reference safe.",
+            "time": "2014-05-10 03:22:52"
         },
         {
             "name": "mockery/mockery",
@@ -715,9 +718,7 @@
             "time": "2014-04-18 20:37:09"
         }
     ],
-    "aliases": [
-
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
         "esperance/esperance": 20,
@@ -725,10 +726,6 @@
         "mockery/mockery": 20,
         "symfony/console": 20
     },
-    "platform": [
-
-    ],
-    "platform-dev": [
-
-    ]
+    "platform": [],
+    "platform-dev": []
 }

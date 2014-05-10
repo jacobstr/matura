@@ -9,6 +9,9 @@ abstract class Block
     /** @var Callable $fn The method we're wrapping with testing bacon. */
     protected $fn;
 
+    /** @var array A stack used to track Block invocatons. */
+    protected $invocation_context;
+
     /**
      * @var string $name The block name. Used in output to identify tests and
      * for filtering by strings.
@@ -30,11 +33,31 @@ abstract class Block
     /** @var int $assertions The number of assertions within this block's immediate $fn. */
     protected $assertions = 0;
 
-    public function __construct(Block $parent_block = null, $fn = null, $name = null)
+    /** @var Block[] Child block elements. */
+    protected $children = array();
+
+    public function __construct(InvocationContext $invocation_context, $fn = null, $name = null)
     {
-        $this->parent_block = $parent_block ?: InvocationContext::activeBlock();
+        $this->invocation_context = $invocation_context;
+        $this->parent_block = $invocation_context->activeBlock();
         $this->fn = $fn;
         $this->name = $name;
+    }
+
+    // Test Context via Magic Properties
+    // #################################
+
+    /** @var Arbitrary properties are set here. */
+    protected $context = array();
+
+    public function __get($name)
+    {
+        return $this->context[$name];
+    }
+
+    public function __set($name, $value)
+    {
+        $this->context[$name] = $value;
     }
 
     /**
@@ -60,24 +83,24 @@ abstract class Block
         return $this->skipped;
     }
 
-    public function invoke()
+    public final function invoke()
     {
-        if ($this->isSkipped()) {
-            throw new SkippedException($this->skipped_because);
-        }
+        return $this->invokeWithin($this->fn, array($this->closestSuite()));
+    }
 
-        $this->invoked = true;
+    public function invokeWithin($fn)
+    {
+        $this->invocation_context->activate();
 
-        InvocationContext::push($this);
+        $this->invocation_context->push($this);
         try {
-            $result = call_user_func($this->fn, $this->closestSuite());
-            InvocationContext::pop($this);
+            $result = call_user_func($fn, $this->closestSuite());
+            $this->invocation_context->pop();
+            return $result;
         } catch(\Exception $e) {
-            InvocationContext::pop($this);
+            $this->invocation_context->pop();
             throw $e;
-        }
-
-        return $result;
+        } // Finally, some day.
     }
 
     public function addAssertion()
@@ -90,7 +113,7 @@ abstract class Block
         return $this->assertions;
     }
 
-    public function path()
+    public function path($start = null, $end = null)
     {
         $ancestors = array_map(
             function ($ancestor) {
@@ -99,7 +122,7 @@ abstract class Block
             $this->ancestors()
         );
 
-        $ancestors = array_reverse($ancestors);
+        $ancestors = array_slice(array_reverse($ancestors), $start, $end);
 
         $res = implode(":", $ancestors);
 
@@ -171,13 +194,80 @@ abstract class Block
         return null;
     }
 
+    // Traversing Upwards
+    // ##################
+
     public function closestTest()
     {
-        return $this->closest('\Matura\Blocks\Methods\TestMethod');
+        return $this->closest('Matura\Blocks\Methods\TestMethod');
     }
 
     public function closestSuite()
     {
-        return $this->closest('\Matura\Blocks\Suite');
+        return $this->closest('Matura\Blocks\Suite');
+    }
+
+    // Retrieving and Filtering Child Blocks
+    // #####################################
+
+    public function addChild(Block $block)
+    {
+        $this->children[] = $block;
+    }
+
+    public function children($of_type = null)
+    {
+        if($of_type == null) {
+            return $this->children;
+        }
+
+        return array_filter($this->children, function ($child) use ($of_type) {
+            return $child instanceof $of_type;
+        });
+    }
+
+    public function tests()
+    {
+        return $this->children('Matura\Blocks\Methods\TestMethod');
+    }
+
+    /**
+     * @var Block[] This Method's nested blocks.
+     */
+    public function describes()
+    {
+        return $this->children('Matura\Blocks\Describe');
+    }
+
+    /**
+     * @return HookMethod[] All of our current `after` hooks.
+     */
+    public function afters()
+    {
+        return $this->children('Matura\Blocks\Methods\AfterHook');
+    }
+
+    /**
+     * @return HookMethod[] All of our current `before` hooks.
+     */
+    public function befores()
+    {
+        return $this->children('Matura\Blocks\Methods\BeforeHook');
+    }
+
+    /**
+     * @return HookMethod[] All of our current `onceBefore` hooks.
+     */
+    public function onceBefores()
+    {
+        return $this->children('Matura\Blocks\Methods\OnceBeforeHook');
+    }
+
+    /**
+     * @return HookMethod[] All of our current `onceAfter` hooks.
+     */
+    public function onceAfters()
+    {
+        return $this->children('Matura\Blocks\Methods\OnceAfterHook');
     }
 }

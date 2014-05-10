@@ -93,6 +93,7 @@ class Test extends Command implements Listener
         );
 
         $filter = $input->getOption('filter') ?: '/.*/i';
+        $grep = $input->getOption('grep') ?: '/.*/i';
 
         // Configure Output Modules
         // ########################
@@ -106,7 +107,8 @@ class Test extends Command implements Listener
         // #################
 
         $test_runner = new TestRunner($path, array(
-            'filter' => $filter
+            'filter' => $filter,
+            'grep' => $grep
         ));
 
         $test_runner->addListener($this);

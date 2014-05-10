@@ -1,17 +1,27 @@
 <?php namespace Matura\Test\SelfHosted;
 
-suite('File Filtering', function ($ctx) {
-    describe('Suite', function ($ctx) {
-        it('should have a top level suite', function ($ctx) {
-            expect($ctx->suite)->to->be->an('Matura\Blocks\Suite');
+use Matura\Core\TestRunner;
+
+describe('Filtering', function ($suite) {
+    describe('Unfiltered', function($suite) {
+        before(function ($suite) {
+            $suite->runner = new TestRunner(__DIR__);
         });
 
-        it('should have a name', function ($ctx) {
-            expect($ctx->suite->path())->to->eql('Fixture');
+        it('should only include files that match a regex.', function ($suite) {
+            $files = $suite->runner->collectFiles();
+            expect(iterator_to_array($files))->to->have->length(3);
+        });
+    });
+
+    describe('Filtered', function($suite) {
+        before(function ($suite) {
+            $suite->runner = new TestRunner(__DIR__, array('filter' => '/stress|filter/'));
         });
 
-        it('should have a path', function ($ctx) {
-            expect($ctx->suite->name())->to->eql('Fixture');
+        it('should only include files that match a regex.', function ($suite) {
+            $files = $suite->runner->collectFiles();
+            expect(iterator_to_array($files))->to->have->length(2);
         });
     });
 });

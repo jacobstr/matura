@@ -3,6 +3,8 @@
 use Matura\Exceptions\Exception;
 use Matura\Exceptions\SkippedException;
 
+use Matura\Core\InvocationContext;
+
 use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Blocks\Block;
@@ -16,20 +18,7 @@ use Matura\Blocks\Methods\OnceAfterHook;
 
 /**
  * Enables the callback based sugar api to work the way it does. It maintains
- * and actually executes the methods defined in the global DSL (@see
- * functions.php).
- *
- * There's a bit of discordance currently with our Blocks and the Builder object.
- * I'm tempted to rename the class to Suite, for example. Possil
- *
- * Responsibilities:
- *  - Maintains state (stack of describe blocks, current block) as it builds the
- *    object graph that represents a file's tests.
- *  - Potentially maps user-friendly DSL parameters to more pedantic class and
- *    function arguments used internally.
- *
- *
- * Some pains have been taken to maintain
+ * and actually executes the methods defined in the global DSL in function.php.
  */
 class Builder
 {
@@ -37,7 +26,11 @@ class Builder
     // ############
     //
     // The global functions defined in functions.inc.php delegate to
-    // corresponding methods in the builder object.
+    // corresponding methods in the builder object. The syntactic sugar leans
+    // on some clever tricks driven by a the interaction of the Builder and the 
+    // InvocationContext.
+    //
+    //
 
     /**
      * Begins a fluent expectation using esperance. Invoked when the test is run
@@ -45,7 +38,8 @@ class Builder
      */
     public static function expect($obj)
     {
-        $expect_method = new ExpectMethod(null, function ($ctx) use (&$obj) {
+        $expect_method = new ExpectMethod(InvocationContext::getActive(), function ($ctx) use (&$obj) {
+            // Should, perhaps be configurable.
             return new \Esperance\Assertion($obj);
         });
         $expect_method->closestTest()->addAssertion();
@@ -53,68 +47,59 @@ class Builder
     }
 
     /**
-     * Skips the test.
+     * Marks the test skipped and throws a SkippedException.
      */
     public static function skip($message = '')
     {
+        $this->skipped = true;
         throw new SkippedException($message);
     }
 
-    /**
-     * Creates a new Describe block. The closure is invoked immediately.
-     */
     public static function describe($name, $fn)
     {
-        $next = new Describe(null, $fn, $name);
+        $next = new Describe(InvocationContext::getActive(), $fn, $name);
         $next->addToParent();
-        $next->invoke();
         return $next;
     }
 
-    /**
-     * Creates a new Describe block. The closure is invoked immediately.
-     */
     public static function suite($name, $fn)
     {
-        $suite = new Suite(null, $fn, $name);
-        $suite->invoke();
+        $suite = new Suite(new InvocationContext(), $fn, $name);
+        $suite->build();
         return $suite;
     }
 
-    /**
-     * Declares a new TestMethod and adds it to the current Describe block.
-     */
     public static function it($name, $fn)
     {
-        $test_method = new TestMethod(null, $fn, $name);
+        $test_method = new TestMethod(InvocationContext::getActive(), $fn, $name);
         $test_method->addToParent();
         return $test_method;
     }
 
     public static function before($fn)
     {
-        $test_method = new BeforeHook(null, $fn);
+        $test_method = new BeforeHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }
 
     public static function onceBefore($fn)
     {
-        $test_method = new OnceBeforeHook(null, $fn);
+        $test_method = new OnceBeforeHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }
 
     public static function after($fn)
     {
-        $test_method = new AfterHook(null, $fn);
+        $test_method = new AfterHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }
 
     public static function onceAfter($fn)
     {
-        $test_method = new OnceAfterHook(null, $fn);
+        $test_method = new OnceAfterHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }
@@ -129,7 +114,7 @@ class Builder
         $result = call_user_func_array(array('static', $name), $arguments);
 
         if ($skip === true && $result instanceof Block) {
-            $result->skip('Skipped because method was x-prefixed');
+            $result->skip();
         }
 
         return $result;
