@@ -123,7 +123,7 @@ abstract class Block
      * Default external invocation method - calls the block originally passed into
      * the constructor along with a new context.
      */
-    public final function invoke()
+    public function invoke()
     {
         return $this->invokeWithin($this->fn, array($this->createContext()));
     }
