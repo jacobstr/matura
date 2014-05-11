@@ -41,8 +41,8 @@ class TestRunner implements Emitter
     }
 
     /**
-     * Recursively obtains all test files under $this->path and returns
-     * the filtered result after applying our our filtering regex.
+     * Recursively obtains all test files under `$this->path` and returns
+     * the filtered result after applying our filtering regex.
      *
      * @return \Iterator
      */

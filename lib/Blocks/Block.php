@@ -1,16 +1,20 @@
 <?php namespace Matura\Blocks;
 
 use Matura\Exceptions\SkippedException;
-use Matura\Core\TestContext;
 use Matura\Core\InvocationContext;
+use Matura\Core\Context;
 
 abstract class Block
 {
     /** @var Callable $fn The method we're wrapping with testing bacon. */
     protected $fn;
 
-    /** @var array A stack used to track Block invocatons. */
+    /** @var InvocationContext tracks our Block invocations in order to support
+        * our dsl. */
     protected $invocation_context;
+
+    /** @var Context Contains additional test-specific state. */
+    protected $context;
 
     /**
      * @var string $name The block name. Used in output to identify tests and
@@ -44,42 +48,6 @@ abstract class Block
         $this->name = $name;
     }
 
-    // Test Context via Magic Properties
-    // #################################
-
-    /** @var Arbitrary properties are set here. */
-    private $context = array();
-
-    public function __get($name)
-    {
-        if(isset($this->context[$name])) {
-            return $this->context[$name];
-        }
-
-        // Traverse around and find the context in an ancestor or sibling hook
-        foreach($this->collectContextProviders() as $context) {
-            if($context->getImmediate($name)) {
-                return $context->getImmediate($name);
-            }
-        }
-
-        return null;
-    }
-
-    protected function getImmediate($name)
-    {
-        if(isset($this->context[$name])) {
-            return $this->context[$name];
-        } else {
-            return null;
-        }
-    }
-
-    public function __set($name, $value)
-    {
-        $this->context[$name] = $value;
-    }
-
     /**
      * Unless the Block has been skipped elsewhere, this marks the block as
      * skipped with the given message.
@@ -103,14 +71,66 @@ abstract class Block
         return $this->skipped;
     }
 
-    public final function invoke()
+    // Test Context Management
+    // #######################
+
+    public function createContext()
     {
-        return $this->invokeWithin($this->fn, array($this));
+        return $this->context = new Context($this);
+    }
+
+    public function getContext()
+    {
+        return $this->context;
     }
 
     /**
-     * Invokes $fn with $args after surrounding it with context management code.
+     * Returns an aray of related contexts, in their intended call order.
      *
+     * @see test_model.php for assertions against various scenarios in order to
+     * grok the `official` behavior.
+     *
+     * @return Context[]
+     */
+    public function getContextChain()
+    {
+        $block_chain = array();
+
+        // This should return all of our before hooks in the order they *should*
+        // have been invoked.
+        $this->traversePost(function($block) use (&$block_chain) {
+            // Ensure ordering - even if the test defininition interleaves
+            // onceBefore with before DSL invocations, we traverse the context
+            // according to the 'onceBefores before befores' convention.
+            $befores = array_merge($block->onceBefores(), $block->befores());
+            $block_chain = array_merge($block_chain, $befores);
+        });
+
+        return array_filter(
+            array_map(
+                function($block) {
+                    return $block->getContext();
+                },
+                $block_chain
+            )
+        );
+    }
+
+    // Invocation Context Management
+    // #############################
+
+    /**
+     * Default external invocation method - calls the block originally passed into
+     * the constructor along with a new context.
+     */
+    public final function invoke()
+    {
+        return $this->invokeWithin($this->fn, array($this->createContext()));
+    }
+
+    /**
+     * Invokes $fn with $args while managing our internal invocation context
+     * in order to ensure our view of the test DSL's call graph is accurate.
      */
     protected function invokeWithin($fn, $args = array())
     {
@@ -238,48 +258,24 @@ abstract class Block
         return $this->closest('Matura\Blocks\Suite');
     }
 
-    /**
-     * Returns any blocks who's contexts are intended to be exposed
-     * to this block.
-     *
-     * @return Block[]
-     */
-    public function collectContextProviders()
-    {
-        $result = array();
-
-        // This should return all of our before hooks in the order they *should*
-        // have been invoked.
-        $this->traversePost(function($block) use (&$result) {
-            // Ensure ordering - even if the test defininition interleaves
-            // onceBefore with before DSL invocations, we traverse the context
-            // according to the onceBefores before befores convention.
-            $befores = array_merge($block->onceBefores(), $block->befores());
-            $result = array_merge($result, $befores);
-        });
-
-        // Reverse everything because a block invoked after should shadow
-        // the context variables of a block invoked prior.
-        return array_reverse($result);
-    }
-
     // Retrieving and Filtering Child Blocks
     // #####################################
 
     public function addChild(Block $block)
     {
-        $this->children[] = $block;
+        $type = get_class($block);
+        if(!isset($this->children[$type])) {
+            $this->children[$type] = array();
+        }
+        $this->children[$type][] = $block;
     }
 
-    public function children($of_type = null)
+    public function children($of_type)
     {
-        if($of_type == null) {
-            return $this->children;
+        if(!isset($this->children[$of_type])) {
+            $this->children[$of_type] = array();
         }
-
-        return array_filter($this->children, function ($child) use ($of_type) {
-            return $child instanceof $of_type;
-        });
+        return $this->children[$of_type];
     }
 
     public function tests()

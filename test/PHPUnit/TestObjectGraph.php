@@ -23,37 +23,35 @@ class TestObjectGraph extends PHPUnit_Framework_TestCase
     // A moderately complex test fixture.
     protected function getUserTest($spy)
     {
-        return suite('User', function ($suite) use ($spy) {
+        return suite('User', function ($ctx) use ($spy) {
 
-           $suite->spy = $spy;
+            describe('Model', function ($ctx) use ($spy) {
+                it('saving', array($spy, 'saving'));
 
-            describe('Model', function ($suite) {
-                it('saving', array($suite->spy, 'saving'));
+                it('removal', array($spy, 'removal'));
 
-                it('removal', array($suite->spy, 'removal'));
+                before(array($spy, 'beforeModel'));
+                onceBefore(array($spy, 'beforeModelOnce'));
 
-                before(array($suite->spy, 'beforeModel'));
-                onceBefore(array($suite->spy, 'beforeModelOnce'));
-
-                after(array($suite->spy, 'afterModel'));
-                onceAfter(array($suite->spy, 'afterModelOnce'));
+                after(array($spy, 'afterModel'));
+                onceAfter(array($spy, 'afterModelOnce'));
             });
 
-            describe('API', function ($suite) {
-                it('valid api token', array($suite->spy, 'api_token'));
+            describe('API', function ($ctx) use ($spy) {
+                it('valid api token', array($spy, 'api_token'));
 
-                before(array($suite->spy, 'beforeAPI'));
-                onceBefore(array($suite->spy, 'beforeAPIOnce'));
+                before(array($spy, 'beforeAPI'));
+                onceBefore(array($spy, 'beforeAPIOnce'));
 
-                after(array($suite->spy, 'afterAPI'));
-                onceAfter(array($suite->spy, 'afterAPIOnce'));
+                after(array($spy, 'afterAPI'));
+                onceAfter(array($spy, 'afterAPIOnce'));
             });
 
-            before(array($suite->spy,'beforeUser'));
-            onceBefore(array($suite->spy,'beforeUserOnce'));
+            before(array($spy,'beforeUser'));
+            onceBefore(array($spy,'beforeUserOnce'));
 
-            after(array($suite->spy,'afterUser'));
-            onceAfter(array($suite->spy,'afterUserOnce'));
+            after(array($spy,'afterUser'));
+            onceAfter(array($spy,'afterUserOnce'));
         });
     }
 
@@ -72,9 +70,9 @@ class TestObjectGraph extends PHPUnit_Framework_TestCase
         $spy->shouldReceive('afterUser')->ordered();
         $spy->shouldReceive('afterUserOnce')->ordered();
 
-        $suite = $this->getUserTest($spy);
+        $ctx = $this->getUserTest($spy);
 
-        $saving_test = $suite->find('User:Model:saving');
+        $saving_test = $ctx->find('User:Model:saving');
         $this->assertInstanceOf('\Matura\Blocks\Methods\TestMethod', $saving_test);
         $this->assertEquals('User:Model:saving', $saving_test->path());
 
@@ -102,12 +100,12 @@ class TestObjectGraph extends PHPUnit_Framework_TestCase
         $spy->shouldReceive('afterUser')->ordered();
         $spy->shouldReceive('afterModel')->ordered();
 
-        $suite = $this->getUserTest($spy);
+        $ctx = $this->getUserTest($spy);
 
-        $saving_test = $suite->find('User:Model:saving');
+        $saving_test = $ctx->find('User:Model:saving');
         $saving_test->invoke();
 
-        $removal_test = $suite->find('User:Model:removal');
+        $removal_test = $ctx->find('User:Model:removal');
         $removal_test->invoke();
     }
 }

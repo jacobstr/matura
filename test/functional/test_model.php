@@ -71,41 +71,60 @@ describe('Matura', function ($ctx) {
             $ctx->group = new Group('admins');
         });
 
-        it('should receive a user', function($ctx) {
+        it('should return null for an undefined value', function($ctx) {
+            expect($ctx->never_set)->to->be(null);
+        });
+
+        it('should have a user', function($ctx) {
             expect($ctx->user)->to->be->a('\Matura\Test\Support\User');
             expect($ctx->user->name)->to->eql('bob');
         });
 
-        it('should receive a group', function($ctx) {
+        it('should have a group', function($ctx) {
             expect($ctx->group)->to->be->a('\Matura\Test\Support\Group');
             expect($ctx->group->name)->to->eql('admins');
         });
 
-        it('should receive a scalar from the before hook', function($ctx) {
+        it('should have a scalar from the before hook', function($ctx) {
             expect($ctx->before_scalar)->to->be(5);
         });
 
-        it('should receive a scalar from the once before hook', function($ctx) {
+        it('should have a scalar from the once before hook', function($ctx) {
             expect($ctx->once_before_scalar)->to->be(10);
         });
 
-        describe('Sibling-Of Isolation', function($ctx) {
+        describe('Nested, Undefined Values', function($ctx) {
+            it('should return null for an undefined value when nested deeper', function($ctx) {
+                expect($ctx->another_never_set)->to->be(null);
+            });
+        });
+
+        describe('Sibling-Of Isolation Block', function($ctx) {
             onceBefore(function($ctx) {
                 $ctx->once_before_scalar = 15;
             });
 
-            it("should receive the clobbered value of `once_before_scalar`", function($ctx) {
+            before(function($ctx) {
+                $ctx->before_scalar = 10;
+                $ctx->group = new Group('staff');
+            });
+
+            it("should have the clobbered value of `once_before_scalar`", function($ctx) {
                 expect($ctx->once_before_scalar)->to->be(15);
+            });
+
+            it("should have the clobbered value of `group`", function($ctx) {
+                expect($ctx->group->name)->to->be('staff');
             });
         });
 
         describe('Isolation', function() {
-          it("should receive the original `once_before_scalar` and not a sibling's", function($ctx) {
+          it("should have the parent `once_before_scalar` and not a sibling's", function($ctx) {
               expect($ctx->once_before_scalar)->to->be(10);
           });
 
-          it("should receive the original `once_before_scalar` and not a sibling's", function($ctx) {
-              expect($ctx->once_before_scalar)->to->be(10);
+          it("should have the parent `before_scalar` and not a sibling's", function($ctx) {
+              expect($ctx->before_scalar)->to->be(5);
           });
         });
     });
