@@ -100,9 +100,9 @@ abstract class Block
         // have been invoked.
         $this->traversePost(function($block) use (&$block_chain) {
             // Ensure ordering - even if the test defininition interleaves
-            // onceBefore with before DSL invocations, we traverse the context
-            // according to the 'onceBefores before befores' convention.
-            $befores = array_merge($block->onceBefores(), $block->befores());
+            // before_all with before DSL invocations, we traverse the context
+            // according to the 'before_alls before befores' convention.
+            $befores = array_merge($block->beforeAlls(), $block->befores());
             $block_chain = array_merge($block_chain, $befores);
         });
 
@@ -308,17 +308,17 @@ abstract class Block
     }
 
     /**
-     * @return HookMethod[] All of our current `onceBefore` hooks.
+     * @return HookMethod[] All of our current `before_all` hooks.
      */
-    public function onceBefores()
+    public function beforeAlls()
     {
         return $this->children('Matura\Blocks\Methods\OnceBeforeHook');
     }
 
     /**
-     * @return HookMethod[] All of our current `onceAfter` hooks.
+     * @return HookMethod[] All of our current `after_all` hooks.
      */
-    public function onceAfters()
+    public function afterAlls()
     {
         return $this->children('Matura\Blocks\Methods\OnceAfterHook');
     }

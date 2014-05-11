@@ -10,7 +10,7 @@ describe('Context', function($ctx) {
         $ctx->user = new User('bob');
     });
 
-    onceBefore(function($ctx) {
+    before_all(function($ctx) {
         $ctx->once_before_scalar = 10;
         $ctx->group = new Group('admins');
     });
@@ -44,7 +44,7 @@ describe('Context', function($ctx) {
     });
 
     describe('Sibling-Of Isolation Block', function($ctx) {
-        onceBefore(function($ctx) {
+        before_all(function($ctx) {
             $ctx->once_before_scalar = 15;
         });
 

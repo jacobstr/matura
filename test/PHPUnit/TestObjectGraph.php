@@ -31,27 +31,27 @@ class TestObjectGraph extends PHPUnit_Framework_TestCase
                 it('removal', array($spy, 'removal'));
 
                 before(array($spy, 'beforeModel'));
-                onceBefore(array($spy, 'beforeModelOnce'));
+                before_all(array($spy, 'beforeModelOnce'));
 
                 after(array($spy, 'afterModel'));
-                onceAfter(array($spy, 'afterModelOnce'));
+                after_all(array($spy, 'afterModelOnce'));
             });
 
             describe('API', function ($ctx) use ($spy) {
                 it('valid api token', array($spy, 'api_token'));
 
                 before(array($spy, 'beforeAPI'));
-                onceBefore(array($spy, 'beforeAPIOnce'));
+                before_all(array($spy, 'beforeAPIOnce'));
 
                 after(array($spy, 'afterAPI'));
-                onceAfter(array($spy, 'afterAPIOnce'));
+                after_all(array($spy, 'afterAPIOnce'));
             });
 
             before(array($spy,'beforeUser'));
-            onceBefore(array($spy,'beforeUserOnce'));
+            before_all(array($spy,'beforeUserOnce'));
 
             after(array($spy,'afterUser'));
-            onceAfter(array($spy,'afterUserOnce'));
+            after_all(array($spy,'afterUserOnce'));
         });
     }
 

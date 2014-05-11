@@ -25,8 +25,8 @@ class Matura
         'it',
         'xit',
 
-        'onceBefore',
-        'xonceBefore',
+        'before_all',
+        'xbefore_all',
 
         'before',
         'xbefore',
@@ -34,8 +34,8 @@ class Matura
         'after',
         'xafter',
 
-        'onceAfter',
-        'xonceAfter',
+        'after_all',
+        'xafter_all',
 
         'describe',
         'xdescribe',

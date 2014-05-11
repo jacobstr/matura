@@ -83,7 +83,7 @@ class Builder
         return $test_method;
     }
 
-    public static function onceBefore($fn)
+    public static function before_all($fn)
     {
         $test_method = new OnceBeforeHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
@@ -97,7 +97,7 @@ class Builder
         return $test_method;
     }
 
-    public static function onceAfter($fn)
+    public static function after_all($fn)
     {
         $test_method = new OnceAfterHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
@@ -130,8 +130,8 @@ class Builder
      * >>$this->getNameAndSkipFlag('xit');
      * array('it', true);
      *
-     * >>$this->getNameAndSkipFlag('onceBefore');
-     * array('onceBefore', false);
+     * >>$this->getNameAndSkipFlag('before_all');
+     * array('before_all', false);
      *
      * @return a 2-tuple of a method name and skip flag.
      */

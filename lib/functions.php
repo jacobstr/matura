@@ -34,18 +34,18 @@ namespace  {
           );
       }
 
-      function onceBefore()
+      function before_all()
       {
           return call_user_func_array(
-              array('\Matura\Core\Builder','onceBefore'),
+              array('\Matura\Core\Builder','before_all'),
               func_get_args()
           );
       }
 
-      function xonceBefore()
+      function xbefore_all()
       {
           return call_user_func_array(
-              array('\Matura\Core\Builder','xonceBefore'),
+              array('\Matura\Core\Builder','xbefore_all'),
               func_get_args()
           );
       }
@@ -82,18 +82,18 @@ namespace  {
           );
       }
 
-      function onceAfter()
+      function after_all()
       {
           return call_user_func_array(
-              array('\Matura\Core\Builder','onceAfter'),
+              array('\Matura\Core\Builder','after_all'),
               func_get_args()
           );
       }
 
-      function xonceAfter()
+      function xafter_all()
       {
           return call_user_func_array(
-              array('\Matura\Core\Builder','xonceAfter'),
+              array('\Matura\Core\Builder','xafter_all'),
               func_get_args()
           );
       }

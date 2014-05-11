@@ -26,9 +26,9 @@ class TestMethod extends Method
      * If each describe block has one of each hook, then sequence of functions
      * called will look like:
      *
-     * 'User::onceBefore', 'User::before', 'Model::onceBefore', 'Model::before'
+     * 'User::before_all', 'User::before', 'Model::before_all', 'Model::before'
      * 'should save'
-     * 'Model::after', 'Model::onceAfter', 'User::after', 'User::onceAfter'
+     * 'Model::after', 'Model::after_all', 'User::after', 'User::after_all'
      *
      * @param Callable $cb A function to invoke with each acquired TestMethod or
      *  HookMethod.
@@ -42,7 +42,7 @@ class TestMethod extends Method
 
         $this->parent_block->traversePost(
             function ($block) use ($cb) {
-                foreach ($block->onceBefores() as $once_before) {
+                foreach ($block->beforeAlls() as $once_before) {
                     $cb($once_before);
                 }
 
@@ -60,7 +60,7 @@ class TestMethod extends Method
                     $cb($after);
                 }
 
-                foreach ($block->onceAfters() as $once_after) {
+                foreach ($block->afterAlls() as $once_after) {
                     $cb($once_after);
                 }
             }
