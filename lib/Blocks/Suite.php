@@ -13,7 +13,7 @@ class Suite extends Describe
     public function build()
     {
         $builder_for = function($block)  use (&$builder_for) {
-            return function ($suite) use ($block, $builder_for) {
+            return function () use ($block, $builder_for) {
                 $block->invoke();
                 foreach($block->describes() as $describe) {
                     $describe->invokeWithin($builder_for($describe));

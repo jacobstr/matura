@@ -88,7 +88,7 @@ class TestRunner implements Emitter
         foreach($tests as $test) {
             $suite = new Suite(
                 new InvocationContext(),
-                function ($suite) use ($test) {
+                function () use ($test) {
                     require $test;
                 },
                 $test->getRealPath()

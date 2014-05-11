@@ -85,7 +85,7 @@ class TestObjectGraph extends PHPUnit_Framework_TestCase
     {
         $spy = Mockery::mock();
 
-        $spy->shouldReceive('beforeUserOnce')->ordered();
+        $spy->shouldReceive('beforeUserOnce')->once()->ordered();
         $spy->shouldReceive('beforeUser')->ordered();
         $spy->shouldReceive('beforeModelOnce')->ordered();
         $spy->shouldReceive('beforeModel')->ordered();

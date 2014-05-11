@@ -5,33 +5,33 @@ use Matura\Core\InvocationContext;
 
 class InvocationContext
 {
-    public $stack = array();
+    protected $stack = array();
 
-    public $total_invocations = 0;
+    protected $total_invocations = 0;
 
-    public static $active_invocation_context;
+    protected static $active_invocation_context;
 
     public function closestSuite()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Suite');
+        return $this->closest('\Matura\Blocks\Suite');
     }
 
     public function closestDescribe()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Describe');
+        return $this->closest('\Matura\Blocks\Describe');
     }
 
     public function closestTest()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Methods\TestMethod');
+        return $this->closest('\Matura\Blocks\Methods\TestMethod');
     }
 
     public function closestBlock()
     {
-        return $this->stackGrepClass('\Matura\Blocks\Block');
+        return $this->closest('\Matura\Blocks\Block');
     }
 
-    public function stackGrepClass($name)
+    public function closest($name)
     {
         foreach (array_reverse($this->stack) as $block) {
             if (is_a($block, $name)) {

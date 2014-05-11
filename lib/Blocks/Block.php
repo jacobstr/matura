@@ -48,11 +48,31 @@ abstract class Block
     // #################################
 
     /** @var Arbitrary properties are set here. */
-    protected $context = array();
+    private $context = array();
 
     public function __get($name)
     {
-        return $this->context[$name];
+        if(isset($this->context[$name])) {
+            return $this->context[$name];
+        }
+
+        // Traverse around and find the context in an ancestor or sibling hook
+        foreach($this->collectContextProviders() as $context) {
+            if($context->getImmediate($name)) {
+                return $context->getImmediate($name);
+            }
+        }
+
+        return null;
+    }
+
+    protected function getImmediate($name)
+    {
+        if(isset($this->context[$name])) {
+            return $this->context[$name];
+        } else {
+            return null;
+        }
     }
 
     public function __set($name, $value)
@@ -85,22 +105,26 @@ abstract class Block
 
     public final function invoke()
     {
-        return $this->invokeWithin($this->fn, array($this->closestSuite()));
+        return $this->invokeWithin($this->fn, array($this));
     }
 
-    public function invokeWithin($fn)
+    /**
+     * Invokes $fn with $args after surrounding it with context management code.
+     *
+     */
+    protected function invokeWithin($fn, $args = array())
     {
         $this->invocation_context->activate();
 
         $this->invocation_context->push($this);
         try {
-            $result = call_user_func($fn, $this->closestSuite());
+            $result = call_user_func_array($fn, $args);
             $this->invocation_context->pop();
             return $result;
         } catch(\Exception $e) {
             $this->invocation_context->pop();
             throw $e;
-        } // Finally, some day.
+        } // Finally
     }
 
     public function addAssertion()
@@ -113,7 +137,14 @@ abstract class Block
         return $this->assertions;
     }
 
-    public function path($start = null, $end = null)
+    /**
+     * With no arguments, returns the complete path to this block down from it's
+     * root ancestor.
+     *
+     * @param int $offset Used to arary_slice the intermediate array before implosion.
+     * @param int $length Used to array_slice the intermediate array before implosion.
+     */
+    public function path($offset = null, $length = null)
     {
         $ancestors = array_map(
             function ($ancestor) {
@@ -122,7 +153,7 @@ abstract class Block
             $this->ancestors()
         );
 
-        $ancestors = array_slice(array_reverse($ancestors), $start, $end);
+        $ancestors = array_slice(array_reverse($ancestors), $offset, $length);
 
         $res = implode(":", $ancestors);
 
@@ -205,6 +236,31 @@ abstract class Block
     public function closestSuite()
     {
         return $this->closest('Matura\Blocks\Suite');
+    }
+
+    /**
+     * Returns any blocks who's contexts are intended to be exposed
+     * to this block.
+     *
+     * @return Block[]
+     */
+    public function collectContextProviders()
+    {
+        $result = array();
+
+        // This should return all of our before hooks in the order they *should*
+        // have been invoked.
+        $this->traversePost(function($block) use (&$result) {
+            // Ensure ordering - even if the test defininition interleaves
+            // onceBefore with before DSL invocations, we traverse the context
+            // according to the onceBefores before befores convention.
+            $befores = array_merge($block->onceBefores(), $block->befores());
+            $result = array_merge($result, $befores);
+        });
+
+        // Reverse everything because a block invoked after should shadow
+        // the context variables of a block invoked prior.
+        return array_reverse($result);
     }
 
     // Retrieving and Filtering Child Blocks

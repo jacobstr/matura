@@ -28,6 +28,6 @@ $gensuite = function ($depth, $tests_per_level, $befores_per_level) use (&$gensu
     });
 };
 
-xsuite('Fixture', function ($ctx) use (&$gensuite) {
+suite('Fixture', function ($ctx) use (&$gensuite) {
     $gensuite(15, 25, 5);
 });
