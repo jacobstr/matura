@@ -44,6 +44,20 @@ class Result
         return $this->status;
     }
 
+    public function getStatusString()
+    {
+        switch($this->status) {
+            case Result::SUCCESS:
+                return 'success';
+            case Result::FAILURE:
+                return 'failure';
+            case Result::SKIPPED:
+                return 'skipped';
+            default:
+                return null;
+        }
+    }
+
     public function getReturned()
     {
         return $this->returned;

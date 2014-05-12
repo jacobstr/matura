@@ -16,6 +16,7 @@ use Matura\Core\ErrorHandler;
 use Matura\Blocks\Suite;
 
 use Matura\Events\Listener;
+use Matura\Events\Event;
 use Matura\Matura;
 
 class Test extends Command implements Listener
@@ -59,7 +60,7 @@ class Test extends Command implements Listener
         );
 
         $output->getFormatter()->setStyle(
-            'fail',
+            'failure',
             new OutputFormatterStyle('red')
         );
 
@@ -69,7 +70,7 @@ class Test extends Command implements Listener
         );
 
         $output->getFormatter()->setStyle(
-            'skip',
+            'skipped',
             new OutputFormatterStyle('magenta')
         );
 
@@ -119,20 +120,12 @@ class Test extends Command implements Listener
         return $code;
     }
 
-    public function onMaturaEvent($name, $args)
+    public function onMaturaEvent(Event $event)
     {
-        if ($name === 'test.complete') {
-            $this->output->writeln(
-                $this->printer->renderResult($args[0], $args[1])
-            );
-        } elseif ($name === 'suite.start') {
-            $this->output->writeln(
-                $this->printer->renderStart($args[0], $args[1])
-            );
-        } elseif ($name === 'test_run.complete') {
-            $this->output->writeln(
-                $this->printer->renderSummary($args[0])
-            );
+        $output = $this->printer->renderEvent($event);
+
+        if ($output !== null) {
+            $this->output->writeln($output);
         }
     }
 }

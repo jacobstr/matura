@@ -1,4 +1,4 @@
-<?php namespace Matura\Test\Support;
+<?php namespace Matura\Test\Fixtures;
 
 class Group
 {

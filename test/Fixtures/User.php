@@ -1,4 +1,4 @@
-<?php namespace Matura\Test\Support;
+<?php namespace Matura\Test\Fixtures;
 
 class User
 {
@@ -8,5 +8,4 @@ class User
     {
         $this->name = $name;
     }
-
 }

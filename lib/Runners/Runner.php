@@ -11,6 +11,7 @@ use Matura\Core\Result;
 
 use Matura\Events\Listener;
 use Matura\Events\Emitter;
+use Matura\Events\Event;
 
 use ArrayIterator;
 use RegexIterator;
@@ -29,13 +30,14 @@ abstract class Runner implements Emitter
 
     public function emit($name, $arguments = array())
     {
+        $event = new Event($name, $arguments);
         foreach ($this->listeners as $listener) {
-            call_user_func(array($listener, 'onMaturaEvent'), $name, $arguments);
+            call_user_func(array($listener, 'onMaturaEvent'), $event);
         }
     }
 
     /**
      * @return ResultSet
      */
-    public abstract function run();
+    abstract public function run();
 }

@@ -36,5 +36,5 @@ describe('Deep and Branched', function ($ctx) use (&$gensuite) {
 });
 
 describe('Shallow', function ($ctx) use (&$gensuite) {
-    $gensuite(1, 10000, 5);
+    // $gensuite(1, 1000, 5);
 });

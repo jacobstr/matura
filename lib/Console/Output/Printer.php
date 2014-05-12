@@ -1,13 +1,39 @@
 <?php namespace Matura\Console\Output;
 
 use Matura\Core\Result;
-use Matura\Core\ResultSet;
+use Matura\Events\Event;
+
+use Matura\Blocks\Block;
 use Matura\Blocks\Suite;
+use Matura\Blocks\Describe;
 use Matura\Exceptions\Exception as MaturaException;
 
 use Twig_Loader_Filesystem;
 use Twig_Environment;
 use Twig_SimpleFilter;
+
+function indent_width(Block $block)
+{
+    $level = $block->depth() - 1;
+    return $level*2 - 1;
+}
+
+function indent($string, $amt = 3)
+{
+    if (empty($string)) {
+        return '';
+    } else {
+        $indent = str_repeat(" ", $amt);
+        return $indent.implode(explode("\n", $string), "\n".$indent);
+    }
+}
+
+function tag($tag)
+{
+    $rest = array_slice(func_get_args(), 1);
+    $text = implode($rest);
+    return "<$tag>$text</$tag>";
+}
 
 /**
  * Contains test rendering methods.
@@ -21,87 +47,63 @@ class Printer
     public function __construct($options = array())
     {
         $this->options = array_merge($this->options, $options);
-
-        $loader = new Twig_Loader_Filesystem(__DIR__.'/../../../templates');
-
-        $twig = new Twig_Environment($loader, array(
-            'autoescape' => false
-        ));
-
-        $twig->addFilter(new Twig_SimpleFilter(
-            'indent',
-            function ($string, $amt = 3) {
-                $indent = str_repeat(" ", $amt);
-                $result = $indent.implode(explode("\n", trim($string)), "\n".$indent);
-                return $result;
-            }
-        ));
-
-        $twig->addFilter(new Twig_SimpleFilter(
-            'pad_*_*',
-            function ($direction, $amt, $string) {
-                $dir_mapping = array(
-                    'left'  => STR_PAD_LEFT,
-                    'right' => STR_PAD_RIGHT,
-                    'both'  => STR_PAD_BOTH,
-                );
-                return str_pad($string, $amt, " ", $dir_mapping[$direction]);
-            }
-        ));
-
-        $this->twig = $twig;
     }
 
-    public function render($template, $context)
+    public function onTestComplete(Event $event)
     {
-        return $this->twig->render($template, $context);
+        // ResultSet
+        $index        = $event->result_set->totalTests();
+        // TestMethod
+        $indent_width = ($event->test->depth() - 1) * 2;
+        $name         = $event->test->getName();
+        // Result
+        $style        = $event->result->getStatusString();
+        $status       = $event->result->getStatus();
+
+        $icon_map = array(
+            Result::SUCCESS => '✓',
+            Result::FAILURE => '✘',
+            Result::SKIPPED => '○'
+        );
+
+        $icon = $icon_map[$status];
+
+        $preamble = "$icon " . $index . ') ';
+        $preamble = str_pad($preamble, $indent_width, " ", STR_PAD_RIGHT);
+
+        return tag($style, $preamble) . $name;
     }
 
-    public function renderResult(Result $result, ResultSet $result_set)
+    public function onTestRunComplete(Event $event)
     {
-        $context = array(
-            // Trim the generally redundant suite name from the path by starting
-            // at an offset of 1 from the root of our Block hierarchy.
-            'path'   => $result->getMethod()->path(1),
-            'status' => $result->getStatus(),
-            'index'  => $result_set->totalTests()
+        $parts = array(
+            tag("bold", "Passed:"),
+            "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
+            tag("bold", "Skipped:"),
+            "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
+            tag("bold", "Assertions:"),
+            "{$event->result_set->totalAssertions()}"
         );
 
-        $exception = $result->getException();
-        if ($exception) {
-            $context['exception_message']  = $exception->getMessage();
-            $context['exception_category'] = $exception->getCategory();
-            $context['exception_traces']   = $this->formatTrace($exception);
-        }
-
-        $status_mapping = array(
-            '0' => 'result_failure.txt',
-            '1' => 'result_skipped.txt',
-            '2' => 'result_success.txt'
-        );
-
-        $template = $status_mapping[$result->getStatus()];
-
-        return trim($this->render($template, $context));
+        return implode(" ", $parts);
     }
 
-    public function renderSummary($result_set)
+    public function onSuiteStart(Event $event)
     {
-        $context = array(
-            'result_set' => $result_set
-        );
-
-        return $this->render('summary.txt', $context);
+        $path = $event->suite->path();
+        return "<bold>Running: $path</bold>";
     }
 
-    public function renderStart(Suite $suite, ResultSet $result_set)
+    public function onSuiteComplete(Event $event)
     {
-        $context = array(
-            'suite' => $suite,
-            'result_set' => $result_set,
-        );
+        return "";
+    }
 
-        return $this->render('test_suite_start.txt', $context);
+    public function onDescribeStart(Event $event)
+    {
+        $name = $event->describe->getName();
+        $indent_width = ($event->describe->depth() - 1) * 2;
+        return indent("<bold>Describe $name </bold>", $indent_width);
     }
 
     public function formatTrace(MaturaException $exception)
@@ -120,5 +122,17 @@ class Printer
             array_slice($exception->originalTrace(), 0, $this->options['trace_depth'])
         );
         return $trace;
+    }
+
+    public function renderEvent(Event $event)
+    {
+        $parts = array_map('ucfirst', array_filter(preg_split('/_|\./', $event->name)));
+        $name = 'on'.implode($parts);
+
+        if (is_callable(array($this, $name))) {
+            return call_user_func(array($this, $name), $event);
+        } else {
+            return null;
+        }
     }
 }

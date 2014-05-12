@@ -170,7 +170,7 @@ abstract class Block
     {
         $ancestors = array_map(
             function ($ancestor) {
-                return $ancestor->name();
+                return $ancestor->getName();
             },
             $this->ancestors()
         );
@@ -182,13 +182,26 @@ abstract class Block
         return $res;
     }
 
-    public function name()
+    public function getName()
     {
         return $this->name;
     }
 
     // Traversal
     // #########
+
+    public function depth()
+    {
+        $total = 0;
+        $block = $this;
+
+        while ($block->parentBlock()) {
+            $block = $block->parentBlock();
+            $total++;
+        }
+
+        return $total;
+    }
 
     public function ancestors()
     {
@@ -238,7 +251,8 @@ abstract class Block
         }
     }
 
-    public function closest($class_name) {
+    public function closest($class_name)
+    {
         foreach ($this->ancestors() as $ancestor) {
             if (is_a($ancestor, $class_name)) {
                 return $ancestor;

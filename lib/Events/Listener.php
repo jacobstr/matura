@@ -2,5 +2,5 @@
 
 interface Listener
 {
-    public function onMaturaEvent($name, $args);
+    public function onMaturaEvent(Event $event);
 }

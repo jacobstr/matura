@@ -37,7 +37,8 @@ class TestRunner extends Runner
 
     protected $result_set;
 
-    public function __construct($path, $options = array()) {
+    public function __construct($path, $options = array())
+    {
         $this->path = $path;
         $this->options = array_merge($this->options, $options);
         $this->result_set = new ResultSet();
@@ -70,29 +71,30 @@ class TestRunner extends Runner
     {
         $tests = $this->collectFiles();
 
-        $this->emit('test_run.start', array($this->result_set));
+        $this->emit('test_run.start', array('result_set' => $this->result_set));
 
-        foreach($tests as $test) {
+        foreach ($tests as $test_file) {
             $suite = new Suite(
                 new InvocationContext(),
-                function () use ($test) {
-                    require $test;
+                function () use ($test_file) {
+                    require $test_file;
                 },
-                $test->getRealPath()
+                $test_file->getPathName()
             );
 
             $suite->build();
-            $suite_runner = new SuiteRunner($suite, $this->result_set);
+
+            $suite_runner = new SuiteRunner($suite, new ResultSet());
 
             // Forward my listeners.
-            foreach($this->listeners as $listener) {
+            foreach ($this->listeners as $listener) {
                 $suite_runner->addListener($listener);
             }
 
             $suite_runner->run();
         }
 
-        $this->emit('test_run.complete', array($this->result_set));
+        $this->emit('test_run.complete', array('result_set' => $this->result_set));
 
         return $this->result_set;
     }

@@ -1,7 +1,7 @@
 {% extends "result.txt" %}
 
 {% block title %}
-<fail> ✘ {{ index|pad_left_2 }}) {{ path }} </fail>
+<fail> ✘ {{ index|pad_left_2 }}) {{ name }} </fail>
 {% endblock %}
 
 {% block details %}

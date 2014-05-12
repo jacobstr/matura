@@ -1,5 +1,4 @@
 {% extends "result.txt" %}
-
 {% block title %}
-<skip> ○ {{ index|pad_left_2 }}) {{ path }} </skip>
+<skip> ○ {{ index|pad_left_2 }}) {{ name }} </skip>
 {% endblock %}

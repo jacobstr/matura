@@ -12,9 +12,9 @@ describe('Matura', function ($ctx) {
     before(function ($ctx) {
         // Officially, nesting suites in this manner is unsupported.
         // A Suite block is automatically created for every test file.
-        $ctx->suite = suite('Suite', function() {
+        $ctx->suite = suite('Suite', function () {
             describe('Fixture', function ($ctx) {
-                it('TestMethod', function($test) {
+                it('TestMethod', function ($test) {
 
                 });
             });
@@ -22,7 +22,7 @@ describe('Matura', function ($ctx) {
     });
 
     describe('Suite', function ($ctx) {
-        before(function($ctx) {
+        before(function ($ctx) {
             $ctx->describe = $ctx->suite->find('Suite:Fixture');
         });
 
@@ -31,7 +31,7 @@ describe('Matura', function ($ctx) {
         });
 
         it('should have a name', function ($ctx) {
-            expect($ctx->suite->name())->to->eql('Suite');
+            expect($ctx->suite->getName())->to->eql('Suite');
         });
 
         it('should have a path', function ($ctx) {
@@ -43,31 +43,35 @@ describe('Matura', function ($ctx) {
         });
     });
 
-    describe('Describe', function($ctx) {
-        before(function($ctx) {
+    describe('Describe', function ($ctx) {
+        before(function ($ctx) {
             $ctx->describe = $ctx->suite->find('Suite:Fixture');
         });
 
-        it('should be a Describe Block', function($ctx) {
+        it('should be a Describe Block', function ($ctx) {
             expect($ctx->describe)->to->be->a('Matura\Blocks\Describe');
         });
 
-        it('should have the correct parent Block', function($ctx) {
+        it('should have the correct parent Block', function ($ctx) {
             expect($ctx->describe->parentBlock())->to->be($ctx->suite);
         });
     });
 
-    describe('TestMethod', function($ctx) {
-        before(function($ctx) {
+    describe('TestMethod', function ($ctx) {
+        before(function ($ctx) {
             $ctx->test = $ctx->suite->find('Suite:Fixture:TestMethod');
         });
 
-        it('should be a TestMethod', function($ctx) {
+        it('should be a TestMethod', function ($ctx) {
             expect($ctx->test)->to->be->a('Matura\Blocks\Methods\TestMethod');
         });
 
-        it('should have the correct parent Block', function($ctx) {
+        it('should have the correct parent Block', function ($ctx) {
             expect($ctx->test->parentBlock())->to->be->a('Matura\Blocks\Describe');
+        });
+
+        it('should fail', function ($ctx) {
+            throw new Exception('sdfs');
         });
     });
 });

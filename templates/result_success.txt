@@ -1,5 +1,5 @@
 {% extends "result.txt" %}
 
 {% block title %}
-<success> ✓ {{ index|pad_left_2 }}) {{ path }} </success>
+<success> ✓ {{ index|pad_left_2 }}){{ " "|pad_right(indent) }}{{ name }} </success>
 {% endblock %}
