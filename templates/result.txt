@@ -1,1 +1,0 @@
-<success>{% filter pad_right(indent) %}✓ {{ index|pad_left_2 }}){% endfilter %} {{ name }}</success>

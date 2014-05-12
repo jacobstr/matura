@@ -280,7 +280,7 @@ abstract class Block
     public function addChild(Block $block)
     {
         $type = get_class($block);
-        if(!isset($this->children[$type])) {
+        if (!isset($this->children[$type])) {
             $this->children[$type] = array();
         }
         $this->children[$type][] = $block;

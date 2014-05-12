@@ -35,6 +35,16 @@ function tag($tag)
     return "<$tag>$text</$tag>";
 }
 
+function pad_left($length, $string, $char = ' ')
+{
+    return str_pad($string, $length, $char, STR_PAD_LEFT);
+}
+
+function pad_right($length, $string, $char = ' ')
+{
+    return str_pad($string, $length, $char, STR_PAD_RIGHT);
+}
+
 /**
  * Contains test rendering methods.
  */
@@ -69,29 +79,45 @@ class Printer
         $icon = $icon_map[$status];
 
         $preamble = "$icon " . $index . ') ';
-        $preamble = str_pad($preamble, $indent_width, " ", STR_PAD_RIGHT);
+        $preamble = pad_right($indent_width, $preamble, " ");
 
         return tag($style, $preamble) . $name;
     }
 
     public function onTestRunComplete(Event $event)
     {
-        $parts = array(
+        $summary = array(
             tag("bold", "Passed:"),
             "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
             tag("bold", "Skipped:"),
-            "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
+            "{$event->result_set->totalSkipped()} of {$event->result_set->totalTests()}",
             tag("bold", "Assertions:"),
             "{$event->result_set->totalAssertions()}"
         );
 
-        return implode(" ", $parts);
+        // The Passed / Failed / Skipped summary
+        $summary = implode(" ", $summary);
+
+        // Error formatting.
+        $failures = $event->result_set->getFailures();
+        $failure_count = count($failures);
+
+        $index = 0;
+        $result = array();
+        foreach ($failures as $failure) {
+            $index++;
+            $result[] = $this->formatFailure($index, $failure);
+        }
+
+        return $summary . "\n\n" . implode("\n\n", $result);
     }
 
     public function onSuiteStart(Event $event)
     {
-        $path = $event->suite->path();
-        return "<bold>Running: $path</bold>";
+        $label = "Running: ".$event->suite->path();
+        $length = strlen($label);
+
+        return tag("bold", $label."\n").str_repeat("-", $length);
     }
 
     public function onSuiteComplete(Event $event)
@@ -106,24 +132,51 @@ class Printer
         return indent("<bold>Describe $name </bold>", $indent_width);
     }
 
-    public function formatTrace(MaturaException $exception)
+    // Formatting helpers
+    // ##################
+
+    protected function formatFailure(Result $failure)
     {
-        $trace = array_map(
-            function ($trace) {
-                $parts = array();
-                if (isset($trace['file'])) {
-                    $parts[] = $trace['file'].':'.$trace['line'];
-                }
-                if (isset($trace['function'])) {
-                    $parts[] = $trace['function'].'()';
-                }
-                return implode(" ", $parts);
-            },
-            array_slice($exception->originalTrace(), 0, $this->options['trace_depth'])
+        $exception = $failure->getException();
+        $exception_category = $failure->getException()->getCategory();
+
+        return implode(
+            "\n",
+            array(
+                tag("failure", $failure->getBlock()->path()),
+                tag("info", $exception_category.': ') . $exception->getMessage(),
+                tag("info", "Via:"),
+                $this->formatTrace($exception)
+            )
         );
-        return $trace;
     }
 
+    public function formatTrace(MaturaException $exception)
+    {
+        $index = 0;
+        $result = array();
+        $sliced_trace = array_slice($exception->originalTrace(), 0, $this->options['trace_depth']);
+
+        foreach ($sliced_trace as $trace) {
+            $index++;
+
+            $parts = array(pad_right(4, $index.")"));
+
+            if (isset($trace['file'])) {
+                $parts[] = $trace['file'].':'.$trace['line'];
+            }
+            if (isset($trace['function'])) {
+                $parts[] = $trace['function'].'()';
+            }
+            $result[] = implode($parts);
+        }
+
+        return indent(implode("\n", $result));
+    }
+
+    /**
+     * Conducts our 'event_group.action' => 'onEventGroupAction delegation'
+     */
     public function renderEvent(Event $event)
     {
         $parts = array_map('ucfirst', array_filter(preg_split('/_|\./', $event->name)));

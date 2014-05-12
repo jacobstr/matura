@@ -71,7 +71,7 @@ describe('Matura', function ($ctx) {
         });
 
         it('should fail', function ($ctx) {
-            throw new Exception('sdfs');
+            throw new Exception('deliberate exception in test_model');
         });
     });
 });

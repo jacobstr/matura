@@ -53,7 +53,7 @@ class TestRunner extends Runner
     public function collectFiles()
     {
         if (is_dir($this->path)) {
-            $directory = new RecursiveDirectoryIterator($this->path, FilesystemIterator::SKIP_DOTS );
+            $directory = new RecursiveDirectoryIterator($this->path, FilesystemIterator::SKIP_DOTS);
             $iterator = new RecursiveIteratorIterator($directory);
             return new RegexIterator($iterator, $this->options['filter']);
         } else {
@@ -71,7 +71,7 @@ class TestRunner extends Runner
     {
         $tests = $this->collectFiles();
 
-        $this->emit('test_run.start', array('result_set' => $this->result_set));
+        $this->emit('test_run.start');
 
         foreach ($tests as $test_file) {
             $suite = new Suite(
@@ -84,7 +84,9 @@ class TestRunner extends Runner
 
             $suite->build();
 
-            $suite_runner = new SuiteRunner($suite, new ResultSet());
+            $suite_result = new ResultSet();
+            $suite_runner = new SuiteRunner($suite, $suite_result);
+            $this->result_set->addResult($suite_result);
 
             // Forward my listeners.
             foreach ($this->listeners as $listener) {

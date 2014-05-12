@@ -114,7 +114,7 @@ class Test extends Command implements Listener
         $test_runner->addListener($this);
 
         Matura::init();
-        $code = $test_runner->run()->exitCode();
+        $code = $test_runner->run()->isSuccessful() ? 1 : 0;
         Matura::cleanup();
 
         return $code;

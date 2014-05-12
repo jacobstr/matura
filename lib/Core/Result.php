@@ -3,17 +3,16 @@
 use Matura\Blocks\Block;
 use Matura\Blocks\Methods\TestMethod;
 
-class Result
+class Result implements ResultComponent
 {
     const SUCCESS = 2;
     const SKIPPED = 1;
     const FAILURE = 0;
 
     /**
-     * @var TestMethod $method The TestMethod which was run to obtain the given
-     * result.
+     * @var Block $owning_block The block that created us.
      */
-    protected $method;
+    protected $owning_block;
 
     /**
      * @var int $status The status code for a test.
@@ -27,16 +26,16 @@ class Result
     /** @var mixed $result The return value or Exception raised by a test. */
     protected $result = null;
 
-    public function __construct(Block $method, $status, $returned)
+    public function __construct(Block $owning_block, $status, $returned)
     {
-        $this->method   = $method;
-        $this->status   = $status;
-        $this->returned = $returned;
+        $this->owning_block = $owning_block;
+        $this->status       = $status;
+        $this->returned     = $returned;
     }
 
-    public function getMethod()
+    public function getBlock()
     {
-        return $this->method;
+        return $this->owning_block;
     }
 
     public function getStatus()
@@ -72,12 +71,32 @@ class Result
         }
     }
 
-    public function getAssertionCount()
+    public function totalTests()
     {
-        return $this->method->getAssertionCount();
+        return $this->owning_block ? 1 : 0;
     }
 
-    public function isSuccess()
+    public function totalAssertions()
+    {
+        return $this->owning_block->getAssertionCount();
+    }
+
+    public function totalFailures()
+    {
+        return $this->isFailure() ? 1 : 0;
+    }
+
+    public function totalSuccesses()
+    {
+        return $this->isSuccessful() ? 1 : 0;
+    }
+
+    public function totalSkipped()
+    {
+        return $this->isSkipped() ? 1 : 0;
+    }
+
+    public function isSuccessful()
     {
         return $this->status == static::SUCCESS;
     }
@@ -90,5 +109,14 @@ class Result
     public function isSkipped()
     {
         return $this->status == static::SKIPPED;
+    }
+
+    public function getFailures()
+    {
+        if ($this->isFailure()) {
+            return array($this);
+        } else {
+            return array();
+        }
     }
 }

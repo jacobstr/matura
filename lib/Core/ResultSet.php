@@ -1,12 +1,11 @@
 <?php namespace Matura\Core;
 
-class ResultSet implements \IteratorAggregate
+use IteratorAggregate;
+use ArrayIterator;
+
+class ResultSet implements ResultComponent, IteratorAggregate
 {
     private $results = array();
-
-    public function __construct()
-    {
-    }
 
     public function addResult($result)
     {
@@ -15,14 +14,14 @@ class ResultSet implements \IteratorAggregate
 
     public function getIterator()
     {
-        return new \ArrayIterator($this->results);
+        return new ArrayIterator($this->results);
     }
 
     public function totalAssertions()
     {
         $sum = 0;
         foreach ($this as $result) {
-            $sum += $result->getAssertionCount();
+            $sum += $result->totalAssertions();
         }
         return $sum;
     }
@@ -49,23 +48,25 @@ class ResultSet implements \IteratorAggregate
         return $sum;
     }
 
-    public function totalTests()
-    {
-        return count($this->results);
-    }
-
     public function totalSuccesses()
     {
         $sum = 0;
-        foreach ($this as $result) {
-            if ($result->isSuccess()) {
-                $sum++;
-            }
+        foreach ($this->results as $result) {
+            $sum += $result->totalSuccesses();
         }
         return $sum;
     }
 
-    public function exitCode()
+    public function totalTests()
+    {
+        $sum = 0;
+        foreach ($this->results as $result) {
+            $sum += $result->totalTests();
+        }
+        return $sum;
+    }
+
+    public function isSuccessful()
     {
         // Generate exit code based on result set.
         if ($this->totalFailures() === 0) {
@@ -73,5 +74,36 @@ class ResultSet implements \IteratorAggregate
         } else {
             return 1;
         }
+    }
+
+    public function isFailure()
+    {
+        return ! $this->isSuccessful();
+    }
+
+    public function isSkipped()
+    {
+        // Need to think about this along with before all and after all failures
+        // which are the most likely candidates for issues failures during
+        // a result set invocation context.
+        return false;
+    }
+
+    public function getFailures()
+    {
+        $failures = array();
+        foreach ($this->results as $result) {
+            $failures = array_merge($failures, $result->getFailures());
+        }
+        return $failures;
+    }
+
+    public function getExceptions()
+    {
+        $exceptions = array();
+        foreach ($this->results as $result) {
+            $exceptions = array_merge($exceptions, $result->getExceptions());
+        }
+        return $exceptions;
     }
 }

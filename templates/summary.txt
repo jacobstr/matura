@@ -1,2 +1,0 @@
-
-<bold>Passed:</bold> {{ result_set.totalSuccesses }} of {{ result_set.totalTests }} <bold>Skipped:</bold> {{ result_set.totalSkipped }} <bold>Assertions:</bold> {{ result_set.totalAssertions }}
