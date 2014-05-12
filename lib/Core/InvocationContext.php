@@ -11,6 +11,8 @@ class InvocationContext
 
     protected static $active_invocation_context;
 
+    protected static $contexts = array();
+
     public function closestSuite()
     {
         return $this->closest('\Matura\Blocks\Suite');
@@ -71,6 +73,13 @@ class InvocationContext
     public function activate()
     {
         static::$active_invocation_context = $this;
+        static::$contexts[] = $this;
+    }
+
+    public function deactivate()
+    {
+        array_pop(static::$contexts);
+        static::$active_invocation_context = end(static::$contexts);
     }
 
     public static function getActive()

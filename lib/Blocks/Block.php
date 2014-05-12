@@ -140,9 +140,11 @@ abstract class Block
         try {
             $result = call_user_func_array($fn, $args);
             $this->invocation_context->pop();
+            $this->invocation_context->deactivate();
             return $result;
         } catch(\Exception $e) {
             $this->invocation_context->pop();
+            $this->invocation_context->deactivate();
             throw $e;
         } // Finally
     }

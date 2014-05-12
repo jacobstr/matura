@@ -64,7 +64,7 @@ class Printer
             // at an offset of 1 from the root of our Block hierarchy.
             'path'   => $result->getMethod()->path(1),
             'status' => $result->getStatus(),
-            'index'  => $result_set->totalTests() + 1
+            'index'  => $result_set->totalTests()
         );
 
         $exception = $result->getException();

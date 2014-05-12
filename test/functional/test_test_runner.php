@@ -1,6 +1,6 @@
 <?php namespace Matura\Test\SelfHosted;
 
-use Matura\Core\TestRunner;
+use Matura\Runners\TestRunner;
 
 describe('TestRunner', function($ctx) {
 
@@ -16,7 +16,7 @@ describe('TestRunner', function($ctx) {
 
           it('should include all *.php files if no filter is specified', function ($ctx) {
               $files = $ctx->runner->collectFiles();
-              expect(iterator_to_array($files))->to->have->length(2);
+              expect(iterator_to_array($files))->to->have->length(3);
           });
       });
 

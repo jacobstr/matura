@@ -9,8 +9,7 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 use Matura\Console\Output\Printer;
 
-use Matura\Core\TestContext;
-use Matura\Core\TestRunner;
+use Matura\Runners\TestRunner;
 use Matura\Core\ResultSet;
 use Matura\Core\ErrorHandler;
 
@@ -113,7 +112,11 @@ class Test extends Command implements Listener
 
         $test_runner->addListener($this);
 
-        return $test_runner->run()->exitCode();
+        Matura::init();
+        $code = $test_runner->run()->exitCode();
+        Matura::cleanup();
+
+        return $code;
     }
 
     public function onMaturaEvent($name, $args)
@@ -122,7 +125,7 @@ class Test extends Command implements Listener
             $this->output->writeln(
                 $this->printer->renderResult($args[0], $args[1])
             );
-        } elseif ($name === 'test_suite.start') {
+        } elseif ($name === 'suite.start') {
             $this->output->writeln(
                 $this->printer->renderStart($args[0], $args[1])
             );

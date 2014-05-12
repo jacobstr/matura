@@ -1,5 +1,7 @@
 <?php namespace Matura\Blocks;
 
+use Matura\Core\SuiteRunner;
+
 use Matura\Blocks\Methods\TestMethod;
 use Matura\Blocks\Methods\HookMethod;
 use Matura\Exceptions\Exception;

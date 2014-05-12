@@ -3,6 +3,14 @@
 use Matura\Blocks\Methods\TestMethod;
 use Matura\Blocks\Methods\HookMethod;
 
+use Matura\Core\Result;
+
+use Matura\Events\Emitter;
+use Matura\Events\Listener;
+
+use Exception;
+use Matura\Exceptions\Exception as MaturaException;
+
 /**
  * A specialized Block for modelling a test suite.
  *
@@ -11,6 +19,8 @@ use Matura\Blocks\Methods\HookMethod;
  */
 class Describe extends Block
 {
+    protected $listeners = array();
+
     /**
      * Finds a single TestMethod or Block with a given Path. We will return
      * the first match obtained - even though additional, ambiguous matches may
@@ -41,29 +51,4 @@ class Describe extends Block
         return null;
     }
 
-    // Nested Blocks and Tests
-    // #######################
-
-    /**
-     * Traverses the Describe graph recursively and all descendant TestMethods.
-     *
-     * Filtering is not done at this level.
-     *
-     * @return TestMethod[]
-     */
-    public function collectTests()
-    {
-        $result = array();
-
-        foreach ($this->tests() as $test) {
-            $result[] = $test;
-        }
-
-
-        foreach ($this->describes() as $describe) {
-            $result = array_merge($result, $describe->collectTests());
-        }
-
-        return $result;
-    }
 }

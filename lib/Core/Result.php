@@ -1,5 +1,6 @@
 <?php namespace Matura\Core;
 
+use Matura\Blocks\Block;
 use Matura\Blocks\Methods\TestMethod;
 
 class Result
@@ -26,7 +27,7 @@ class Result
     /** @var mixed $result The return value or Exception raised by a test. */
     protected $result = null;
 
-    public function __construct(TestMethod $method, $status, $returned)
+    public function __construct(Block $method, $status, $returned)
     {
         $this->method   = $method;
         $this->status   = $status;
