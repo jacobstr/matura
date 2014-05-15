@@ -5,8 +5,7 @@ use Matura\Test\Support\User;
 use Matura\Test\Support\Group;
 
 /**
- * Tests the construction of our test graph - which relies on a lot of code thats
- * too clever for it's own good.
+ * Tests the construction of our test graph.
  */
 describe('Matura', function ($ctx) {
     before(function ($ctx) {
@@ -68,10 +67,6 @@ describe('Matura', function ($ctx) {
 
         it('should have the correct parent Block', function ($ctx) {
             expect($ctx->test->parentBlock())->to->be->a('Matura\Blocks\Describe');
-        });
-
-        it('should fail', function ($ctx) {
-            throw new Exception('deliberate exception in test_model');
         });
     });
 });

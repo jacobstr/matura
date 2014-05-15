@@ -1,4 +1,4 @@
-<?php namespace Matura\Test\Fixtures;
+<?php namespace Matura\Test\Support;
 
 class User
 {

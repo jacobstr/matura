@@ -4,8 +4,15 @@ use Matura\Runners\TestRunner;
 
 describe('TestRunner', function($ctx) {
 
+  // Tests this directory structure, under a TestRunner.
+  //
+  // ▾ subfolder/
+  //     sub_folder_test.php
+  //   another_fake_test.php
+  //   fake_test.php
+
   before(function($ctx) {
-      $ctx->fixture_folder = __DIR__.'/../Support/';
+      $ctx->fixture_folder = __DIR__.'/../fixtures/fake_folders/';
   });
 
   describe('Filtering', function ($ctx) {
@@ -22,12 +29,21 @@ describe('TestRunner', function($ctx) {
 
       describe('Filtered', function($ctx) {
           before(function ($ctx) {
-              $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/Group/'));
+              $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/test/'));
           });
 
           it('should only include files that match a regex.', function ($ctx) {
               $files = $ctx->runner->collectFiles();
-              expect(iterator_to_array($files))->to->have->length(1);
+              expect(iterator_to_array($files))->to->have->length(3);
+          });
+
+          before(function ($ctx) {
+            $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/fake(?>!folder)/'));
+          });
+
+          it('should only include files that match regex.', function ($ctx) {
+              $files = $ctx->runner->collectFiles();
+              expect(iterator_to_array($files))->to->have->length(2);
           });
       });
   });

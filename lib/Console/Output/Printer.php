@@ -18,7 +18,7 @@ function indent_width(Block $block)
     return $level*2 - 1;
 }
 
-function indent($string, $amt = 3)
+function indent($amt, $string)
 {
     if (empty($string)) {
         return '';
@@ -90,7 +90,9 @@ class Printer
             tag("bold", "Passed:"),
             "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
             tag("bold", "Skipped:"),
-            "{$event->result_set->totalSkipped()} of {$event->result_set->totalTests()}",
+            "{$event->result_set->totalSkipped()}",
+            tag("bold", "Failed:"),
+            "{$event->result_set->totalFailures()}",
             tag("bold", "Assertions:"),
             "{$event->result_set->totalAssertions()}"
         );
@@ -106,10 +108,11 @@ class Printer
         $result = array();
         foreach ($failures as $failure) {
             $index++;
+            $result[] = tag("failure", pad_right(4, "$index )")."FAILURE: ". $failure->getBlock()->path());
             $result[] = $this->formatFailure($index, $failure);
         }
 
-        return $summary . "\n\n" . implode("\n\n", $result);
+        return $summary . "\n\n" . implode("\n", $result);
     }
 
     public function onSuiteStart(Event $event)
@@ -129,26 +132,25 @@ class Printer
     {
         $name = $event->describe->getName();
         $indent_width = ($event->describe->depth() - 1) * 2;
-        return indent("<bold>Describe $name </bold>", $indent_width);
+        return indent($indent_width, "<bold>Describe $name </bold>");
     }
 
     // Formatting helpers
     // ##################
 
-    protected function formatFailure(Result $failure)
+    protected function formatFailure($index, Result $failure)
     {
         $exception = $failure->getException();
         $exception_category = $failure->getException()->getCategory();
 
-        return implode(
+        return indent(4, implode(
             "\n",
             array(
-                tag("failure", $failure->getBlock()->path()),
                 tag("info", $exception_category.': ') . $exception->getMessage(),
                 tag("info", "Via:"),
                 $this->formatTrace($exception)
             )
-        );
+        ));
     }
 
     public function formatTrace(MaturaException $exception)
@@ -171,7 +173,7 @@ class Printer
             $result[] = implode($parts);
         }
 
-        return indent(implode("\n", $result));
+        return indent(3, implode("\n", $result));
     }
 
     /**
