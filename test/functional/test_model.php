@@ -14,7 +14,6 @@ describe('Matura', function ($ctx) {
         $ctx->suite = suite('Suite', function () {
             describe('Fixture', function ($ctx) {
                 it('TestMethod', function ($test) {
-
                 });
             });
         });
