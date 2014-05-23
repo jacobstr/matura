@@ -29,21 +29,12 @@ describe('TestRunner', function($ctx) {
 
       describe('Filtered', function($ctx) {
           before(function ($ctx) {
-              $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/test/'));
+            $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/\/fake(\w|\.)*$/'));
           });
 
-          it('should only include files that match a regex.', function ($ctx) {
+          it('should only include files that match start with fake.', function ($ctx) {
               $files = $ctx->runner->collectFiles();
-              expect(iterator_to_array($files))->to->have->length(3);
-          });
-
-          before(function ($ctx) {
-            $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/fake(?>!folder)/'));
-          });
-
-          it('should only include files that match regex.', function ($ctx) {
-              $files = $ctx->runner->collectFiles();
-              expect(iterator_to_array($files))->to->have->length(2);
+              expect(iterator_to_array($files))->to->have->length(1);
           });
       });
   });

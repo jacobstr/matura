@@ -48,7 +48,7 @@ describe('Matura', function ($ctx) {
         });
 
         it('should be a Describe Block', function ($ctx) {
-            expect($ctx->describe)->to->be->a('Matura\Blocks\Describe');
+            expect($ctx->describe)->to->be->a('Matura\Blocks\sdfsdDescribe');
         });
 
         it('should have the correct parent Block', function ($ctx) {

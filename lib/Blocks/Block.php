@@ -132,7 +132,7 @@ abstract class Block
      * Invokes $fn with $args while managing our internal invocation context
      * in order to ensure our view of the test DSL's call graph is accurate.
      */
-    protected function invokeWithin($fn, $args = array())
+    public function invokeWithin($fn, $args = array())
     {
         $this->invocation_context->activate();
 

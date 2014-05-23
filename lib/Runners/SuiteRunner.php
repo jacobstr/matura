@@ -118,7 +118,7 @@ class SuiteRunner extends Runner
     {
         try {
             // TODO $return_value not needed maybe?
-            $return_value = $fn($triggering_block);
+            $return_value = call_user_func($fn, $triggering_block);
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {
             $status = Result::FAILURE;
