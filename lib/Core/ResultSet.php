@@ -5,11 +5,21 @@ use ArrayIterator;
 
 class ResultSet implements ResultComponent, IteratorAggregate
 {
+    /**
+     * @var ResultComponent[]
+     */
     private $results = array();
+
+    /**
+     * @var int An iteratively updated test count. Should be equivalent to
+     * totalTests().
+     */
+    private $total_tests;
 
     public function addResult($result)
     {
         $this->results[] = $result;
+        $this->total_tests += $result->totalTests();
     }
 
     public function getIterator()
@@ -64,6 +74,11 @@ class ResultSet implements ResultComponent, IteratorAggregate
             $sum += $result->totalTests();
         }
         return $sum;
+    }
+
+    public function currentTestIndex()
+    {
+        return $this->total_tests;
     }
 
     public function isSuccessful()

@@ -41,23 +41,23 @@ class Util
                 $current_depth
             )
             {
-                for ($i = 0; $i < $config['tests']; $i++) {
+                for ($i = 1; $i <= $config['tests']; $i++) {
                     it("nested $i", $config['callbacks']['it']);
                 }
 
-                for ($i = 0; $i < $config['befores']; $i++) {
+                for ($i = 1; $i <= $config['befores']; $i++) {
                     before($config['callbacks']['before']);
                 }
 
-                for ($i = 0; $i < $config['before_alls']; $i++) {
+                for ($i = 1; $i <= $config['before_alls']; $i++) {
                     before_all($config['callbacks']['before_all']);
                 }
 
-                for ($i = 0; $i < $config['after_alls']; $i++) {
+                for ($i = 1; $i <= $config['after_alls']; $i++) {
                     after_all($config['callbacks']['after_all']);
                 }
 
-                for ($i = 0; $i < $config['afters']; $i++) {
+                for ($i = 1; $i <= $config['afters']; $i++) {
                     after($config['callbacks']['after']);
                 }
 

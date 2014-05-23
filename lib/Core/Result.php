@@ -5,9 +5,10 @@ use Matura\Blocks\Methods\TestMethod;
 
 class Result implements ResultComponent
 {
-    const SUCCESS = 2;
-    const SKIPPED = 1;
-    const FAILURE = 0;
+    const INCOMPLETE = 4;
+    const SUCCESS    = 2;
+    const SKIPPED    = 1;
+    const FAILURE    = 0;
 
     /**
      * @var Block $owning_block The block that created us.
@@ -52,6 +53,8 @@ class Result implements ResultComponent
                 return 'failure';
             case Result::SKIPPED:
                 return 'skipped';
+            case Result::INCOMPLETE:
+                return 'incomplete';
             default:
                 return null;
         }
@@ -86,6 +89,11 @@ class Result implements ResultComponent
         return $this->isFailure() ? 1 : 0;
     }
 
+    public function totalIncomplete()
+    {
+        return $this->isIncomplete() ? 1 : 0;
+    }
+
     public function totalSuccesses()
     {
         return $this->isSuccessful() ? 1 : 0;
@@ -109,6 +117,11 @@ class Result implements ResultComponent
     public function isSkipped()
     {
         return $this->status == static::SKIPPED;
+    }
+
+    public function isIncomplete()
+    {
+        return $this->block->getAssertionCount() == 0;
     }
 
     public function getFailures()

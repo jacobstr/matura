@@ -7,6 +7,8 @@ use Matura\Test\Support\Group;
 describe('Context', function ($ctx) {
     before(function ($ctx) {
         $ctx->before_scalar = 5;
+        $ctx->empty_array = array();
+        $ctx->false = false;
         $ctx->user = new User('bob');
     });
 
@@ -17,6 +19,14 @@ describe('Context', function ($ctx) {
 
     it('should return null for an undefined value', function ($ctx) {
         expect($ctx->never_set)->to->be(null);
+    });
+
+    it('should allow and preserve setting empty arrays', function ($ctx) {
+        expect($ctx->empty_array)->to->be(array());
+    });
+
+    it('should allow and preserve setting false', function ($ctx) {
+        expect($ctx->false)->to->be(false);
     });
 
     it('should have a user', function ($ctx) {
@@ -43,7 +53,7 @@ describe('Context', function ($ctx) {
         });
     });
 
-    describe('Sibling-Of Isolation Block', function ($ctx) {
+    describe('Sibling-Of `Isolation` Block', function ($ctx) {
         before_all(function ($ctx) {
             $ctx->once_before_scalar = 15;
         });

@@ -54,6 +54,8 @@ class Printer
         'trace_depth' => 7
     );
 
+    protected $test_count = 0;
+
     public function __construct($options = array())
     {
         $this->options = array_merge($this->options, $options);
@@ -61,19 +63,19 @@ class Printer
 
     public function onTestComplete(Event $event)
     {
-        // ResultSet
-        $index        = $event->result_set->totalTests();
-        // TestMethod
+        $index        = $this->test_count;
+        // Via TestMethod
         $indent_width = ($event->test->depth() - 1) * 2;
         $name         = $event->test->getName();
-        // Result
+        // Via Result
         $style        = $event->result->getStatusString();
         $status       = $event->result->getStatus();
 
         $icon_map = array(
             Result::SUCCESS => '✓',
             Result::FAILURE => '✘',
-            Result::SKIPPED => '○'
+            Result::SKIPPED => '○',
+            Result::INCOMPLETE => '○'
         );
 
         $icon = $icon_map[$status];
@@ -115,12 +117,16 @@ class Printer
         return $summary . "\n\n" . implode("\n", $result);
     }
 
+    public function onTestStart(Event $event)
+    {
+        $this->test_count++;
+    }
+
     public function onSuiteStart(Event $event)
     {
         $label = "Running: ".$event->suite->path();
-        $length = strlen($label);
 
-        return tag("bold", $label."\n").str_repeat("-", $length);
+        return tag("suite", $label."\n");
     }
 
     public function onSuiteComplete(Event $event)
@@ -132,7 +138,16 @@ class Printer
     {
         $name = $event->describe->getName();
         $indent_width = ($event->describe->depth() - 1) * 2;
-        return indent($indent_width, "<bold>Describe $name </bold>");
+        return indent($indent_width, "<bold>$name </bold>");
+    }
+
+    public function onDescribeComplete(Event $event)
+    {
+        if ($event->result->isFailure()) {
+            $name = $event->describe->getName();
+            $indent_width = ($event->describe->depth() - 1) * 2;
+            return indent($indent_width, "<failure>Describe $name Failed</failure>");
+        }
     }
 
     // Formatting helpers
@@ -170,7 +185,7 @@ class Printer
             if (isset($trace['function'])) {
                 $parts[] = $trace['function'].'()';
             }
-            $result[] = implode($parts);
+            $result[] = implode(' ', $parts);
         }
 
         return indent(3, implode("\n", $result));

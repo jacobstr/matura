@@ -2,14 +2,34 @@
 
 use Matura\Matura;
 use Matura\Blocks\Block;
+use Matura\Blocks\Describe;
 use Matura\Blocks\Methods\TestMethod;
 use Matura\Blocks\Suite;
 
 use Matura\Core\ResultSet;
 use Matura\Core\Result;
 
+use Matura\Exceptions\IncompleteException;
+use Matura\Exceptions\SkippedException;
+
 use Matura\Exceptions\Exception as MaturaException;
 
+/**
+ * Responsible for running a Suite and it's nested Describes, TestMethods, Before\After
+ * Hooks and so on.
+ *
+ * It's a fairly top-down approach - an alternative might be to have TestMethods
+ * know how to run themselves. However, there's a lot of machinery around
+ * executing a test such as:
+ *
+ * 1. Invoking the *_all hooks only once per Suite.
+ * 2. Invoking before/after hooks for each method.
+ * 3. Wrapping both the hooks and test method execution in our captureResult
+ *    method.
+ * 4. Printing results in a somewhat granular fashion (start / complete events).
+ *
+ * That would convolute the responsibilities of our blocks.
+ */
 class SuiteRunner extends Runner
 {
     protected $options;
@@ -20,14 +40,13 @@ class SuiteRunner extends Runner
         $this->suite = $suite;
         $this->result_set = $result_set;
         $this->options = array_merge(array(
-            'grep' => '//'
+            'grep' => '//',
+            'except' => null,
         ), $options);
     }
 
     /**
      * Runs the Suite from start to finish.
-     *
-     * @return Result
      */
     public function run()
     {
@@ -38,39 +57,56 @@ class SuiteRunner extends Runner
                 'result_set' => $this->result_set
             )
         );
-        // TODO this can swallow errors.
+
         $result = $this->runWithCapture(array($this, 'runGroup'), $this->suite);
 
         $this->emit(
             'suite.complete',
             array(
                 'suite' => $this->suite,
+                'result' => $result,
                 'result_set' => $this->result_set
             )
         );
 
-        return $result;
+        if ($result->isFailure()) {
+            $this->result_set->addResult($result);
+        }
     }
 
     // Nested Blocks and Tests
     // #######################
 
-    /**
-     * @param $owner The Block 'owns' the result of $fn(). E.g. a TestMethod owns
-     * the results from all of it's before and after Hooks.
-     *
-     * before_all and after_all hooks are owned by their encompassing Describe.
-     */
-    protected function runWithCapture($fn, Block $owner)
+    protected function runDescribe(Describe $describe)
     {
-        $result = $this->captureResult($fn, $owner);
-        return $result;
+        $this->emit(
+            'describe.start',
+            array(
+                'describe' => $describe,
+                'result_set' => $this->result_set
+            )
+        );
+
+        $result = $this->runWithCapture(array($this, 'runGroup'), $describe);
+
+        $this->emit(
+            'describe.complete',
+            array(
+                'describe' => $describe,
+                'result' => $result,
+                'result_set' => $this->result_set
+            )
+        );
+
+        if ($result->isFailure()) {
+            $this->result_set->addResult($result);
+        }
     }
 
     protected function runGroup(Block $block)
     {
         // Check if the block should run by grepping it and descendants.
-        if (!$this->grep($block)) {
+        if ($this->isFiltered($block)) {
             return;
         }
 
@@ -83,11 +119,7 @@ class SuiteRunner extends Runner
         }
 
         foreach ($block->describes() as $describe) {
-            $this->emit('describe.start', array('describe' => $describe, 'result_set' => $this->result_set));
-
-            $this->runGroup($describe, $this->result_set);
-
-            $this->emit('describe.complete', array('describe' => $describe, 'result_set' => $this->result_set));
+            $this->runDescribe($describe);
         }
 
         foreach ($block->afterAlls() as $after_all) {
@@ -98,7 +130,7 @@ class SuiteRunner extends Runner
     protected function runTest(TestMethod $test)
     {
         // Check grep filter.
-        if (!$this->grep($test)) {
+        if ($this->isFiltered($test)) {
             return;
         }
 
@@ -116,13 +148,15 @@ class SuiteRunner extends Runner
                 }
             });
 
-            $result = $test->invoke();
+            $test_return_value = $test->invoke();
 
             $test->traversePre(function ($block) {
                 foreach ($block->afters() as $after) {
                     $after->invoke();
                 }
             });
+
+            return $test_return_value;
         }, $test);
 
         $this->result_set->addResult($result);
@@ -138,10 +172,18 @@ class SuiteRunner extends Runner
         return $result;
     }
 
-    public function captureResult($fn, Block $triggering_block)
+    /**
+     * @param $owner The Block 'owns' the result of $fn(). E.g. a TestMethod owns
+     * the results from all of it's before and after hooks.
+     *
+     * (before_all and after_all hooks are owned by their encompassing Describe)
+     *
+     * @return Result
+     */
+    protected function runWithCapture($fn, Block $owner)
     {
         try {
-            $return_value = call_user_func($fn, $triggering_block);
+            $return_value = call_user_func($fn, $owner);
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {
             $status = Result::FAILURE;
@@ -154,42 +196,55 @@ class SuiteRunner extends Runner
             $return_value = new MaturaException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return new Result($triggering_block, $status, $return_value);
+        return new Result($owner, $status, $return_value);
     }
 
-    public function grep(Block $block)
+    /**
+     * Checks if the block or any of it's descendants match our grep filter or
+     * do not match our except filter.
+     *
+     * Descendants are checked in order to retain a test even it's parent block
+     * path does not match.
+     */
+    protected function isFiltered(Block $block)
     {
         // Skip filtering on implicit Suite block.
         if ($block instanceof Suite) {
-            return true;
+            return false;
         }
 
         $options = &$this->options;
 
-        $match = function ($block) use (&$options) {
-            return preg_match($options['grep'], $block->path(0)) === 1;
+        $isFiltered = function ($block) use (&$options) {
+            $filtered = false;
+
+            if ($options['grep']) {
+                $filtered = $filtered || preg_match($options['grep'], $block->path(0)) === 0;
+            }
+
+            if ($options['except']) {
+                $filtered = $filtered || preg_match($options['except'], $block->path(0)) === 1;
+            }
+
+            return $filtered;
         };
 
         if ($block instanceof TestMethod) {
-            return $match($block);
+            return $isFiltered($block);
+        } else {
+            foreach ($block->tests() as $test) {
+                if ($isFiltered($test) === false) {
+                    return false;
+                }
+            }
+
+            foreach ($block->describes() as $describe) {
+                if ($this->isFiltered($describe) === false) {
+                    return false;
+                }
+            }
+
+            return true;
         }
-
-        $recur = function(Block $block) use (&$recur, &$match) {
-            foreach($block->tests() as $test) {
-                if($match($test)) {
-                    return true;
-                }
-            }
-
-            foreach($block->describes() as $describe) {
-                if ($recur($describe)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        return $recur($block);
     }
 }

@@ -75,13 +75,23 @@ class Test extends Command implements Listener
         );
 
         $output->getFormatter()->setStyle(
+            'incomplete',
+            new OutputFormatterStyle('magenta')
+        );
+
+        $output->getFormatter()->setStyle(
             'u',
             new OutputFormatterStyle(null, null, array('underscore'))
         );
 
         $output->getFormatter()->setStyle(
+            'suite',
+            new OutputFormatterStyle('yellow', null)
+        );
+
+        $output->getFormatter()->setStyle(
             'bold',
-            new OutputFormatterStyle('yellow')
+            new OutputFormatterStyle('blue', null)
         );
 
         // Argument parsing
@@ -114,7 +124,7 @@ class Test extends Command implements Listener
         $test_runner->addListener($this);
 
         Matura::init();
-        $code = $test_runner->run()->isSuccessful() ? 1 : 0;
+        $code = $test_runner->run()->isSuccessful() ? 0 : 1;
         Matura::cleanup();
 
         return $code;

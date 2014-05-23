@@ -94,7 +94,7 @@ describe('Ordering', function ($ctx) {
         ));
     });
 
-    it('should invoke nested describes and their hooks in the prescribed order.', function ($ctx) {
+    it('should invoke nested describes and their hooks in the correct order.', function ($ctx) {
         $spy = new Spy();
 
         $suite = gentree($spy, 2, 2, array(

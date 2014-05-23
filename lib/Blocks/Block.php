@@ -98,7 +98,7 @@ abstract class Block
 
         // This should return all of our before hooks in the order they *should*
         // have been invoked.
-        $this->traversePost(function($block) use (&$block_chain) {
+        $this->traversePost(function ($block) use (&$block_chain) {
             // Ensure ordering - even if the test defininition interleaves
             // before_all with before DSL invocations, we traverse the context
             // according to the 'before_alls before befores' convention.
@@ -108,7 +108,7 @@ abstract class Block
 
         return array_filter(
             array_map(
-                function($block) {
+                function ($block) {
                     return $block->getContext();
                 },
                 $block_chain
@@ -142,11 +142,11 @@ abstract class Block
             $this->invocation_context->pop();
             $this->invocation_context->deactivate();
             return $result;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->invocation_context->pop();
             $this->invocation_context->deactivate();
             throw $e;
-        } // Finally
+        }
     }
 
     public function addAssertion()
@@ -288,7 +288,7 @@ abstract class Block
 
     public function children($of_type)
     {
-        if(!isset($this->children[$of_type])) {
+        if (!isset($this->children[$of_type])) {
             $this->children[$of_type] = array();
         }
         return $this->children[$of_type];

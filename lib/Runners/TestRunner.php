@@ -35,8 +35,6 @@ class TestRunner extends Runner
     /** @var The directory or folder containing our test file(s). */
     protected $path;
 
-    protected $result_set;
-
     public function __construct($path, $options = array())
     {
         $this->path = $path;

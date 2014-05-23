@@ -3,47 +3,47 @@
 use Matura\Test\Support\User;
 use Matura\Test\Support\Group;
 
-suite('User', function ($test) {
-    before(function ($test) {
+suite('User', function ($ctx) {
+    before(function ($ctx) {
         $bob = new User();
         $admins = new Group('admins');
 
         $bob->first_name = 'bob';
         $bob->group = $admins;
 
-        $test->bob = $bob;
-        $test->admins = $admins;
+        $ctx->bob = $bob;
+        $ctx->admins = $admins;
     });
 
-    it('should set the bob user', function ($test) {
-        expect($test->bob)->to->be->a('Matura\Test\Support\User');
+    it('should set the bob user', function ($ctx) {
+        expect($ctx->bob)->to->be->a('Matura\Test\Support\User');
     });
 
-    it('should set the admins group', function ($test) {
-        expect($test->admins)->to->be->a('Group');
+    it('should set the admins group', function ($ctx) {
+        expect($ctx->admins)->to->be->a('Group');
     });
 
-    xit('should skip this via xit', function ($test) {
+    xit('should skip this via xit', function ($ctx) {
     });
 
-    it('should skip this test when invoked', function ($test) {
+    it('should skip this test when invoked', function ($ctx) {
         skip();
     });
 
-    it('should fail because of a E_NOTICE', function ($test) {
+    it('should fail because of a E_NOTICE', function ($ctx) {
         $arr = array(0);
         $result = $arr[0] + $arr[1];
     });
 
     // A nested describe block that groups Model / ORM related tests and
     // assertions.
-    describe('Model', function ($test) {
-        before(function ($test) {
+    describe('Model', function ($ctx) {
+        before(function ($ctx) {
             global $DB;
             // Purge and re-seed the database.
         });
 
-        it('should save bob', function ($test) {
+        it('should save bob', function ($ctx) {
 
         });
     });

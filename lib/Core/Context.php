@@ -19,12 +19,12 @@ class Context implements IteratorAggregate
 
     public function __get($name)
     {
-        if(isset($this->context[$name])) {
+        if (isset($this->context[$name])) {
             return $this->context[$name];
         }
 
-        foreach(array_reverse($this->block->getContextChain()) as $context) {
-            if($context->getImmediate($name)) {
+        foreach (array_reverse($this->block->getContextChain()) as $context) {
+            if ($context->getImmediate($name) !== null) {
                 // Cache the value.
                 $this->context[$name] = $context->getImmediate($name);
                 return $this->context[$name];
@@ -36,7 +36,7 @@ class Context implements IteratorAggregate
 
     public function getImmediate($key)
     {
-        return isset($this->context[$key]) ? $this->context[$key] :  null;
+        return array_key_exists($key, $this->context) ? $this->context[$key] :  null;
     }
     /**
      * Sets a value. Always on myself and never on member of the context chain.
