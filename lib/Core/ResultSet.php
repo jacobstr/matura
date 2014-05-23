@@ -31,7 +31,7 @@ class ResultSet implements ResultComponent, IteratorAggregate
         $sum = 0;
         foreach ($this as $result) {
             if ($result->isFailure()) {
-                $sum++;
+                $sum += $result->totalFailures();
             }
         }
         return $sum;
@@ -70,9 +70,9 @@ class ResultSet implements ResultComponent, IteratorAggregate
     {
         // Generate exit code based on result set.
         if ($this->totalFailures() === 0) {
-            return 0;
+            return true;
         } else {
-            return 1;
+            return false;
         }
     }
 

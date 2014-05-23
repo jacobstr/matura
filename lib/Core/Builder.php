@@ -12,9 +12,9 @@ use Matura\Blocks\Block;
 use Matura\Blocks\Methods\ExpectMethod;
 use Matura\Blocks\Methods\TestMethod;
 use Matura\Blocks\Methods\BeforeHook;
-use Matura\Blocks\Methods\OnceBeforeHook;
+use Matura\Blocks\Methods\BeforeAllHook;
 use Matura\Blocks\Methods\AfterHook;
-use Matura\Blocks\Methods\OnceAfterHook;
+use Matura\Blocks\Methods\AfterAllHook;
 
 /**
  * Enables the callback based sugar api to work the way it does. It maintains
@@ -85,7 +85,7 @@ class Builder
 
     public static function before_all($fn)
     {
-        $test_method = new OnceBeforeHook(InvocationContext::getActive(), $fn);
+        $test_method = new BeforeAllHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }
@@ -99,7 +99,7 @@ class Builder
 
     public static function after_all($fn)
     {
-        $test_method = new OnceAfterHook(InvocationContext::getActive(), $fn);
+        $test_method = new AfterAllHook(InvocationContext::getActive(), $fn);
         $test_method->addToParent();
         return $test_method;
     }

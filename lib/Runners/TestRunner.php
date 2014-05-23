@@ -85,7 +85,9 @@ class TestRunner extends Runner
             $suite->build();
 
             $suite_result = new ResultSet();
-            $suite_runner = new SuiteRunner($suite, $suite_result);
+            $suite_runner = new SuiteRunner($suite, $suite_result, array(
+                'grep' => $this->options['grep']
+            ));
             $this->result_set->addResult($suite_result);
 
             // Forward my listeners.

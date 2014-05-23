@@ -328,7 +328,7 @@ abstract class Block
      */
     public function beforeAlls()
     {
-        return $this->children('Matura\Blocks\Methods\OnceBeforeHook');
+        return $this->children('Matura\Blocks\Methods\BeforeAllHook');
     }
 
     /**
@@ -336,6 +336,6 @@ abstract class Block
      */
     public function afterAlls()
     {
-        return $this->children('Matura\Blocks\Methods\OnceAfterHook');
+        return $this->children('Matura\Blocks\Methods\AfterAllHook');
     }
 }

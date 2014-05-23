@@ -1,6 +1,6 @@
 <?php namespace Matura\Blocks\Methods;
 
-class OnceBeforeHook extends HookMethod
+class BeforeAllHook extends HookMethod
 {
     protected $result;
     protected $invoked;

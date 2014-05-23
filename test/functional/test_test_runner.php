@@ -38,4 +38,67 @@ describe('TestRunner', function($ctx) {
           });
       });
   });
+
+  describe('Grepping', function ($ctx) {
+      describe('Ungrepped', function ($ctx) {
+          before(function ($ctx) {
+              $ctx->runner = new TestRunner(
+                  $ctx->fixture_folder . '/fake_test.php'
+              );
+          });
+
+          it('should run the correct tests', function ($ctx) {
+              $result = $ctx->runner->run();
+              // Level L1:nested 0
+              // Level L1:nested 1
+              // Level L1:Level L2:nested 0
+              // Level L1:Level L2:nested 1
+              // Level L1:Level R2:nested 0
+              // Level L1:Level R2:nested 1
+              // Level R1:nested 0
+              // Level R1:nested 1
+              // Level R1:Level L2:nested 0
+              // Level R1:Level L2:nested 1
+              // Level R1:Level R2:nested 0
+              // Level R1:Level R2:nested 1
+              expect($result->totalTests())->to->eql(12);
+          });
+      });
+
+      describe('Grepped `Level L`', function($ctx) {
+          before(function ($ctx) {
+              $ctx->runner = new TestRunner(
+                  $ctx->fixture_folder . '/fake_test.php',
+                  array('grep' => '/Level L1/')
+              );
+          });
+
+          it('should run the correct tests', function ($ctx) {
+              $result = $ctx->runner->run();
+              // Level L1:nested 0
+              // Level L1:nested 1
+              // Level L1:Level L2:nested 0
+              // Level L1:Level L2:nested 1
+              // Level L1:Level R2:nested 0
+              // Level L1:Level R2:nested 1
+              expect($result->totalTests())->to->eql(6);
+          });
+      });
+
+      describe('Grepped `Level L1:Level R2`', function($ctx) {
+          before(function ($ctx) {
+              $ctx->runner = new TestRunner(
+                  $ctx->fixture_folder . '/fake_test.php',
+                  array('grep' => '/Level L1:Level R2/')
+              );
+          });
+
+          it('should run the correct tests', function ($ctx) {
+              $result = $ctx->runner->run();
+              // Level L1:Level R2:nested 0
+              // Level L1:Level R2:nested 1
+              expect($result->totalTests())->to->eql(2);
+          });
+      });
+  });
 });

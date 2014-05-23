@@ -87,11 +87,11 @@ class Printer
     public function onTestRunComplete(Event $event)
     {
         $summary = array(
-            tag("bold", "Passed:"),
+            tag("success", "Passed:"),
             "{$event->result_set->totalSuccesses()} of {$event->result_set->totalTests()}",
-            tag("bold", "Skipped:"),
+            tag("skipped", "Skipped:"),
             "{$event->result_set->totalSkipped()}",
-            tag("bold", "Failed:"),
+            tag("failure", "Failed:"),
             "{$event->result_set->totalFailures()}",
             tag("bold", "Assertions:"),
             "{$event->result_set->totalAssertions()}"

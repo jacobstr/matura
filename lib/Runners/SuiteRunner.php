@@ -12,14 +12,23 @@ use Matura\Exceptions\Exception as MaturaException;
 
 class SuiteRunner extends Runner
 {
+    protected $options;
     protected $suite;
 
-    public function __construct(Suite $suite, ResultSet $result_set)
+    public function __construct(Suite $suite, ResultSet $result_set, $options = array())
     {
         $this->suite = $suite;
         $this->result_set = $result_set;
+        $this->options = array_merge(array(
+            'grep' => '//'
+        ), $options);
     }
 
+    /**
+     * Runs the Suite from start to finish.
+     *
+     * @return Result
+     */
     public function run()
     {
         $this->emit(
@@ -31,6 +40,7 @@ class SuiteRunner extends Runner
         );
         // TODO this can swallow errors.
         $result = $this->runWithCapture(array($this, 'runGroup'), $this->suite);
+
         $this->emit(
             'suite.complete',
             array(
@@ -38,6 +48,8 @@ class SuiteRunner extends Runner
                 'result_set' => $this->result_set
             )
         );
+
+        return $result;
     }
 
     // Nested Blocks and Tests
@@ -57,29 +69,17 @@ class SuiteRunner extends Runner
 
     protected function runGroup(Block $block)
     {
+        // Check if the block should run by grepping it and descendants.
+        if (!$this->grep($block)) {
+            return;
+        }
+
         foreach ($block->beforeAlls() as $before_all) {
             $before_all->invoke();
         }
 
         foreach ($block->tests() as $test) {
-            $start_context = array(
-                'test' => $test,
-                'result_set' => $this->result_set
-            );
-
-            $this->emit('test.start', $start_context);
-
-            $result = $this->runWithCapture(array($this, 'runTest'), $test);
-
-            $this->result_set->addResult($result);
-
-            $complete_context = array(
-                'test' => $test,
-                'result' => $result,
-                'result_set' => $this->result_set
-            );
-
-            $this->emit('test.complete', $complete_context);
+            $this->runTest($test);
         }
 
         foreach ($block->describes() as $describe) {
@@ -97,19 +97,43 @@ class SuiteRunner extends Runner
 
     protected function runTest(TestMethod $test)
     {
-        $test->traversePost(function ($block) {
-            foreach ($block->befores() as $before) {
-                $before->invoke();
-            }
-        });
+        // Check grep filter.
+        if (!$this->grep($test)) {
+            return;
+        }
 
-        $result = $test->invoke();
+        $start_context = array(
+            'test' => $test,
+            'result_set' => $this->result_set
+        );
 
-        $test->traversePre(function ($block) {
-            foreach ($block->afters() as $after) {
-                $after->invoke();
-            }
-        });
+        $this->emit('test.start', $start_context);
+
+        $result = $this->runWithCapture(function () use ($test) {
+            $test->traversePost(function ($block) {
+                foreach ($block->befores() as $before) {
+                    $before->invoke();
+                }
+            });
+
+            $result = $test->invoke();
+
+            $test->traversePre(function ($block) {
+                foreach ($block->afters() as $after) {
+                    $after->invoke();
+                }
+            });
+        }, $test);
+
+        $this->result_set->addResult($result);
+
+        $complete_context = array(
+            'test' => $test,
+            'result' => $result,
+            'result_set' => $this->result_set
+        );
+
+        $this->emit('test.complete', $complete_context);
 
         return $result;
     }
@@ -117,7 +141,6 @@ class SuiteRunner extends Runner
     public function captureResult($fn, Block $triggering_block)
     {
         try {
-            // TODO $return_value not needed maybe?
             $return_value = call_user_func($fn, $triggering_block);
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {
@@ -132,5 +155,41 @@ class SuiteRunner extends Runner
         }
 
         return new Result($triggering_block, $status, $return_value);
+    }
+
+    public function grep(Block $block)
+    {
+        // Skip filtering on implicit Suite block.
+        if ($block instanceof Suite) {
+            return true;
+        }
+
+        $options = &$this->options;
+
+        $match = function ($block) use (&$options) {
+            return preg_match($options['grep'], $block->path(0)) === 1;
+        };
+
+        if ($block instanceof TestMethod) {
+            return $match($block);
+        }
+
+        $recur = function(Block $block) use (&$recur, &$match) {
+            foreach($block->tests() as $test) {
+                if($match($test)) {
+                    return true;
+                }
+            }
+
+            foreach($block->describes() as $describe) {
+                if ($recur($describe)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        return $recur($block);
     }
 }

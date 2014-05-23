@@ -5,7 +5,7 @@ use Matura\Test\Support\User;
 use Matura\Test\Support\Group;
 
 /**
- * Tests the construction of our test graph.
+ * Tests the construction of our test graph via our DSL.
  */
 describe('Matura', function ($ctx) {
     before(function ($ctx) {
@@ -13,7 +13,15 @@ describe('Matura', function ($ctx) {
         // A Suite block is automatically created for every test file.
         $ctx->suite = suite('Suite', function () {
             describe('Fixture', function ($ctx) {
-                it('TestMethod', function ($test) {
+                it('TestMethod', function ($ctx) {
+                });
+
+                before(function ($ctx) {
+
+                });
+
+                before_all(function ($ctx) {
+
                 });
             });
         });
@@ -47,7 +55,7 @@ describe('Matura', function ($ctx) {
         });
 
         it('should be a Describe Block', function ($ctx) {
-            expect($ctx->describe)->to->be->a('Matura\Blocks\sdfsdDescribe');
+            expect($ctx->describe)->to->be->a('Matura\Blocks\Describe');
         });
 
         it('should have the correct parent Block', function ($ctx) {
@@ -66,6 +74,30 @@ describe('Matura', function ($ctx) {
 
         it('should have the correct parent Block', function ($ctx) {
             expect($ctx->test->parentBlock())->to->be->a('Matura\Blocks\Describe');
+        });
+    });
+
+    describe('BeforeHook', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->describe = $ctx->suite->find('Suite:Fixture');
+        });
+
+        it('should have 1 BeforeHook', function ($ctx) {
+            $befores = $ctx->describe->befores();
+            expect($befores)->to->have->length(1);
+            expect($befores[0])->to->be->a('Matura\Blocks\Methods\BeforeHook');
+        });
+    });
+
+    describe('BeforeAllHook', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->describe = $ctx->suite->find('Suite:Fixture');
+        });
+
+        it('should have 1 BeforeAllHook', function ($ctx) {
+            $before_alls = $ctx->describe->beforeAlls();
+            expect($before_alls)->to->have->length(1);
+            expect($before_alls[0])->to->be->a('Matura\Blocks\Methods\BeforeAllHook');
         });
     });
 });
