@@ -74,6 +74,12 @@ describe('Simple Example', function ($ctx) {
 ```
 ![Matura Shell Output](docs/sample_shell_output.png)
 
+## Documentation
+
+Unfortunately, for now: the [tests themselves](test/functional).
+
+* [In what order is everything run?](test/functional/test_ordering.php).
+* [What is that $ctx parameter?](test/functional/test_context.php). 
 
 ## The CLI
 
