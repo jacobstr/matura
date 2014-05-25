@@ -7,7 +7,8 @@ An Rspec / Mocha inspired testing tool for php. Version: alpha.
 
 ## Installation
 
-You may need to update your composer.json file with `"minimum-stability" : "dev"`.
+1. You may need to update your composer.json file with `"minimum-stability" : "dev"`.
+2. `composer require jacobstr/matura`.
 
 ## Example
 
