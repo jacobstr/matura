@@ -1,6 +1,7 @@
 {
     "name": "jacobstr/matura",
     "description": "A mocha/rspec inspired testing framework for php.",
+    "license": "MIT",
     "authors": [
         {
             "name": "jacobstr",
@@ -24,7 +25,6 @@
         "psr-4": {
             "Matura\\": "lib",
             "Matura\\Test\\": "test"
-        },
-        "_comment" : "autoload-dev was not working with the Test namespace."
+        }
     }
 }
