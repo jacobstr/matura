@@ -28,7 +28,7 @@ use FileSystemIterator;
 class TestRunner extends Runner
 {
     protected $options = array(
-        'filter' => '//',
+        'filter' => '/test.*php/',
         'grep' => '//'
     );
 

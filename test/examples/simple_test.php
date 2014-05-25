@@ -1,14 +1,3 @@
-Matura
-======
-
-An Rspec / Mocha inspired testing tool for php.
-
-Example
-=======
-
-From the project folder run: `bin/mat test test/examples`.
-
-```
 <?php namespace Matura\Test\Examples;
 
 use Matura\Test\Support\User;
@@ -69,17 +58,3 @@ describe('Simple Example', function ($ctx) {
         });
     });
 });
-
-```
-![Matura Shell Output](docs/sample_shell_output.png)
-
-
-CLI
-===
-
-The cli defaults to recursive traversal of the provided path. It currently picks up all `.php` files. 
-
-Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite, use `--grep`. Matura will be clever enough to run the requisite before/after hooks.
-
-
-
