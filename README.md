@@ -3,8 +3,9 @@ Matura
 
 An Rspec / Mocha inspired testing tool for php.
 
-Example
-=======
+---
+
+## Example
 
 From the project folder run: `bin/mat test test/examples`.
 
@@ -74,12 +75,20 @@ describe('Simple Example', function ($ctx) {
 ![Matura Shell Output](docs/sample_shell_output.png)
 
 
-CLI
-===
+## The CLI
+
 
 	./mat test <path> [--filter=] [--grep=]
 
 Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite/file, use `--grep`. Matura will be clever enough to run the requisite before/after hooks - hopefully. This is a bit fresh.
 
+
+## Naive Todo List
+
+
+* There's currently nothing like PHPUnit's backupGlobals.
+* xit / xdescribe and so on are not tested.
+* Backtraces annoyingly include calls internal to the framework.
+ 
 
 
