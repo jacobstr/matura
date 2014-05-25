@@ -76,7 +76,7 @@ class Result implements ResultComponent
 
     public function totalTests()
     {
-        return $this->owning_block ? 1 : 0;
+        return $this->owning_block && ($this->owning_block instanceof TestMethod)  ? 1 : 0;
     }
 
     public function totalAssertions()

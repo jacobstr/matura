@@ -40,9 +40,7 @@ class ResultSet implements ResultComponent, IteratorAggregate
     {
         $sum = 0;
         foreach ($this as $result) {
-            if ($result->isFailure()) {
-                $sum += $result->totalFailures();
-            }
+            $sum += $result->totalFailures();
         }
         return $sum;
     }
@@ -51,9 +49,7 @@ class ResultSet implements ResultComponent, IteratorAggregate
     {
         $sum = 0;
         foreach ($this as $result) {
-            if ($result->isSkipped()) {
-                $sum++;
-            }
+            $sum += $result->totalSkipped();
         }
         return $sum;
     }
@@ -73,6 +69,7 @@ class ResultSet implements ResultComponent, IteratorAggregate
         foreach ($this->results as $result) {
             $sum += $result->totalTests();
         }
+
         return $sum;
     }
 

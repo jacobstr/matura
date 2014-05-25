@@ -103,18 +103,20 @@ class Builder
 
     /**
      * Takes care of our 'x' flag to skip any of the above methods.
+     *
+     * @return Block
      */
     public static function __callStatic($name, $arguments)
     {
         list($name, $skip) = self::getNameAndSkipFlag($name);
 
-        $result = call_user_func_array(array('static', $name), $arguments);
-
-        if ($skip === true && $result instanceof Block) {
-            $result->skip();
+        if($skip) {
+            return;
         }
 
-        return $result;
+        $block = call_user_func_array(array('static', $name), $arguments);
+
+        return $block;
     }
 
     // DSL Utility Methods

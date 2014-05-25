@@ -9,21 +9,22 @@ use Mockery;
 describe('TestRunner', function ($ctx) {
 
     // Tests this directory structure, under a TestRunner.
-    //
-    // ▾ subfolder/
-    //     sub_folder_test.php
-    //   another_fake_test.php
-    //   fake_test.php
-
-    before(function ($ctx) {
-        $ctx->fixture_folder = __DIR__.'/../fixtures/fake_folders/';
-    });
+    // ▾ fake_folders/
+    //   ▾ subfolder/
+    //       sub_folder_test.php
+    //     another_fake_test.php
+    //     fake_test.php
+    //     not_a_test.txt
 
     after(function ($ctx) {
         Mockery::close();
     });
 
     describe('Filtering', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->fixture_folder = __DIR__.'/../fixtures/fake_folders/';
+        });
+
         describe('Unfiltered', function ($ctx) {
             before(function ($ctx) {
                 $ctx->runner = new TestRunner($ctx->fixture_folder);
@@ -48,11 +49,14 @@ describe('TestRunner', function ($ctx) {
     });
 
     describe('Grepping', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->fixture_folder = __DIR__.'/../fixtures/tests/';
+            $ctx->test_file = $ctx->fixture_folder . '/dynamically_generated_test.php';
+        });
+
         describe('Ungrepped', function ($ctx) {
             before(function ($ctx) {
-                $ctx->runner = new TestRunner(
-                    $ctx->fixture_folder . '/fake_test.php'
-                );
+                $ctx->runner = new TestRunner($ctx->test_file);
             });
 
             it('should run the correct tests', function ($ctx) {
@@ -76,7 +80,7 @@ describe('TestRunner', function ($ctx) {
         describe('Grepped `Level L`', function ($ctx) {
             before(function ($ctx) {
                 $ctx->runner = new TestRunner(
-                    $ctx->fixture_folder . '/fake_test.php',
+                    $ctx->test_file,
                     array('grep' => '/Level L1/')
                 );
             });
@@ -96,7 +100,7 @@ describe('TestRunner', function ($ctx) {
         describe('Grepped `Level L1:Level R2`', function ($ctx) {
             before(function ($ctx) {
                 $ctx->runner = new TestRunner(
-                    $ctx->fixture_folder . '/fake_test.php',
+                    $ctx->test_file,
                     array('grep' => '/Level L1:Level R2/')
                 );
             });
@@ -194,6 +198,31 @@ describe('TestRunner', function ($ctx) {
                 expect($failures[0]->getBlock())->to->be->a('Matura\Blocks\Block');
             });
 
+        });
+    });
+
+    describe('End to End', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->fixture_folder = __DIR__.'/../fixtures/tests/';
+            $ctx->test_file = $ctx->fixture_folder . '/failing_and_skipping_test.php';
+            $ctx->runner = new TestRunner($ctx->test_file);
+            $ctx->result = $ctx->runner->run();
+        });
+
+        it('should run all tests', function ($ctx) {
+            expect($ctx->result->totalTests())->to->eql(6);
+        });
+
+        it('should skip 2 tests', function ($ctx) {
+            expect($ctx->result->totalSkipped())->to->eql(1);
+        });
+
+        it('should fail 1 test', function ($ctx) {
+            expect($ctx->result->totalSkipped())->to->eql(1);
+        });
+
+        it('will only count executed assertions', function ($ctx) {
+            expect($ctx->result->totalAssertions())->to->eql(5);
         });
     });
 });
