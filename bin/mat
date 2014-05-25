@@ -1,13 +1,12 @@
 #!/usr/bin/env php
 <?php
-
-require __DIR__ . '/../vendor/autoload.php';
+require 'vendor/autoload.php';
 
 use Matura\Console\Commands\Test as TestCommand;
 use Matura\Console\Commands\ExportDSL as ExportDSLCommand;
 use Symfony\Component\Console\Application;
 
-$application = new Application();
+$application = new Application('Matura CLI', '0.0.1');
 $application->add(new TestCommand);
 $application->add(new ExportDSLCommand);
 $application->run();

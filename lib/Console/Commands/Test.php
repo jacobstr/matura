@@ -25,7 +25,7 @@ class Test extends Command implements Listener
     {
         $this
             ->setName('test')
-            ->setDescription('Run tests.')
+            ->setDescription('Run tests')
             ->addArgument(
                 'path',
                 InputArgument::REQUIRED,
