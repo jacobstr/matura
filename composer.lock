@@ -1,13 +1,14 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "c2729691f10f76fc9a73476a96d13f68",
+    "hash": "5dfcd2eeb99458aeb4b37767ec39a3e9",
     "packages": [
         {
             "name": "esperance/esperance",
-            "version": "dev-master",
+            "version": "dev-use_dumpling",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacobstr/esperance.git",
@@ -246,7 +247,7 @@
     ],
     "packages-dev": [],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": {
         "esperance/esperance": 20,
         "jacobstr/dumpling": 20,

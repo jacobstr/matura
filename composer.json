@@ -11,7 +11,7 @@
     ],
     "bin" : [ "bin/mat" ],
     "require": {
-        "esperance/esperance": "dev-master",
+        "esperance/esperance": "dev-use_dumpling",
         "jacobstr/dumpling": "dev-master",
         "mockery/mockery": "dev-master",
         "symfony/console": "dev-master"
