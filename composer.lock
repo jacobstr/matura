@@ -4,65 +4,31 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5dfcd2eeb99458aeb4b37767ec39a3e9",
+    "hash": "06bf55c7cf2c9a370f9b72456cb49cf9",
     "packages": [
         {
-            "name": "esperance/esperance",
-            "version": "dev-use_dumpling",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/jacobstr/esperance.git",
-                "reference": "e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/jacobstr/esperance/zipball/e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a",
-                "reference": "e1f7ce454fa8fb6a6ff571f35c6f6cab45aef75a",
-                "shasum": ""
-            },
-            "require": {
-                "evenement/evenement": "1.*",
-                "jacobstr/dumpling": "dev-master",
-                "php": ">=5.3.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Esperance": "src"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "description": "BDD style assertion library for PHP.",
-            "keywords": [
-                "assertion",
-                "bdd",
-                "tdd"
-            ],
-            "support": {
-                "source": "https://github.com/jacobstr/esperance/tree/master"
-            },
-            "time": "2014-05-09 08:42:09"
-        },
-        {
             "name": "evenement/evenement",
-            "version": "v1.0.0",
+            "version": "1.0.x-dev",
             "source": {
                 "type": "git",
                 "url": "https://github.com/igorw/evenement.git",
-                "reference": "fa966683e7df3e5dd5929d984a44abfbd6bafe8d"
+                "reference": "8b0918f8374327dfed4408fe467980ab41d556dd"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/igorw/evenement/zipball/fa966683e7df3e5dd5929d984a44abfbd6bafe8d",
-                "reference": "fa966683e7df3e5dd5929d984a44abfbd6bafe8d",
+                "url": "https://api.github.com/repos/igorw/evenement/zipball/8b0918f8374327dfed4408fe467980ab41d556dd",
+                "reference": "8b0918f8374327dfed4408fe467980ab41d556dd",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.0-dev"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Evenement": "src"
@@ -83,7 +49,7 @@
             "keywords": [
                 "event-dispatcher"
             ],
-            "time": "2012-05-30 15:01:08"
+            "time": "2012-12-29 17:04:52"
         },
         {
             "name": "jacobstr/dumpling",
@@ -120,6 +86,45 @@
             ],
             "description": "Like print_r, but depth limited and cyclic reference safe.",
             "time": "2014-05-10 03:22:52"
+        },
+        {
+            "name": "jacobstr/esperance",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jacobstr/esperance.git",
+                "reference": "a8b60ca89db826e64e32d1db7eb6a1997dd385a2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jacobstr/esperance/zipball/a8b60ca89db826e64e32d1db7eb6a1997dd385a2",
+                "reference": "a8b60ca89db826e64e32d1db7eb6a1997dd385a2",
+                "shasum": ""
+            },
+            "require": {
+                "evenement/evenement": "1.*",
+                "jacobstr/dumpling": "dev-master",
+                "php": ">=5.3.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Esperance": "src"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "BDD style assertion library for PHP.",
+            "keywords": [
+                "assertion",
+                "bdd",
+                "tdd"
+            ],
+            "support": {
+                "source": "https://github.com/jacobstr/esperance/tree/master"
+            },
+            "time": "2014-05-25 19:18:59"
         },
         {
             "name": "mockery/mockery",
@@ -249,7 +254,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "esperance/esperance": 20,
+        "jacobstr/esperance": 20,
         "jacobstr/dumpling": 20,
         "mockery/mockery": 20,
         "symfony/console": 20

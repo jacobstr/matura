@@ -11,17 +11,11 @@
     ],
     "bin" : [ "bin/mat" ],
     "require": {
-        "esperance/esperance": "dev-use_dumpling",
+        "jacobstr/esperance": "dev-master",
         "jacobstr/dumpling": "dev-master",
         "mockery/mockery": "dev-master",
         "symfony/console": "dev-master"
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/jacobstr/esperance.git"
-        }
-    ],
     "autoload" : {
         "psr-4": {
             "Matura\\": "lib",
