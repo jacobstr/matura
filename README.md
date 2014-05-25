@@ -77,9 +77,9 @@ describe('Simple Example', function ($ctx) {
 CLI
 ===
 
-The cli defaults to recursive traversal of the provided path. It currently picks up all `.php` files. 
+	./mat test <path> [--filter=] [--grep=]
 
-Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite, use `--grep`. Matura will be clever enough to run the requisite before/after hooks.
+Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite/file, use `--grep`. Matura will be clever enough to run the requisite before/after hooks - hopefully. This is a bit fresh.
 
 
 
