@@ -8,10 +8,6 @@ use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Exceptions\Exception as MaturaException;
 
-use Twig_Loader_Filesystem;
-use Twig_Environment;
-use Twig_SimpleFilter;
-
 function indent_width(Block $block)
 {
     $level = $block->depth() - 1;

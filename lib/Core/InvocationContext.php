@@ -3,15 +3,31 @@
 use Matura\Blocks\Block;
 use Matura\Core\InvocationContext;
 
+/**
+ * Tracks the call stack for our DSL related methods and provides some tools to
+ * traverse them. When the external DSL method 'suite' is invoked, we create
+ * a disjoint context stack. This is used primarily to created a test suite
+ * within a test suite during the self-hosted tests.
+ */
 class InvocationContext
 {
+    /**
+     * @var Block[] $stack
+     * Call stack within a single InvocationContext - each
+     */
     protected $stack = array();
+
+    /**
+     * @var InvocationContext[] $contexts
+     * Stack of invocation contexts - this is generally a single item, except in
+     * cases like `test/test_ordering.php` where we create a self-hosted test
+     * suite.
+     */
+    protected static $contexts = array();
 
     protected $total_invocations = 0;
 
     protected static $active_invocation_context;
-
-    protected static $contexts = array();
 
     public function closestSuite()
     {

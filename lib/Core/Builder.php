@@ -27,10 +27,8 @@ class Builder
     //
     // The global functions defined in functions.inc.php delegate to
     // corresponding methods in the builder object. The syntactic sugar leans
-    // on some clever tricks driven by a the interaction of the Builder and the 
+    // on some clever tricks driven by a the interaction of the Builder and the
     // InvocationContext.
-    //
-    //
 
     /**
      * Begins a fluent expectation using esperance. Invoked when the test is run
@@ -51,7 +49,6 @@ class Builder
      */
     public static function skip($message = '')
     {
-        $this->skipped = true;
         throw new SkippedException($message);
     }
 
