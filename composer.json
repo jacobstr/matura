@@ -1,6 +1,6 @@
 {
     "name": "jacobstr/matura",
-    "description": "A mocha inspired testing framework for php.",
+    "description": "A mocha/rspec inspired testing framework for php.",
     "authors": [
         {
             "name": "jacobstr",
@@ -12,8 +12,7 @@
         "esperance/esperance": "dev-master",
         "jacobstr/dumpling": "dev-master",
         "mockery/mockery": "dev-master",
-        "symfony/console": "dev-master",
-        "twig/twig": "1.*"
+        "symfony/console": "dev-master"
     },
     "repositories": [
         {
