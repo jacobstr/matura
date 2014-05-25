@@ -2,13 +2,14 @@
     "name": "jacobstr/matura",
     "description": "A mocha/rspec inspired testing framework for php.",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "jacobstr",
             "email": "jacobstr@gmail.com"
         }
     ],
-    "bin" : [ "bin/matura" ],
+    "bin" : [ "bin/mat" ],
     "require": {
         "esperance/esperance": "dev-master",
         "jacobstr/dumpling": "dev-master",
