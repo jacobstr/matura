@@ -1,105 +1,97 @@
 Matura
 ======
 
-An Rspec / Mocha inspired testing tool for php. Version: alpha.
+An Rspec / Mocha inspired testing tool for php.
 
 ---
 
 ## Installation
 
-1. You may need to update your composer.json file with `"minimum-stability" : "dev"`.
+1. You may need to update your composer.json file with `"minimum-stability" : "dev"`. Bare with me while I figure out how to be a better maintainer and get this stable.
 2. `composer require jacobstr/matura`.
 
-## Example
+## Features
 
-From the project folder run: `bin/mat test test/examples`.
+- Esperance expectation library: `expect($result)->to->have->length(2)`.	
+- A succinct DSL for defining tests.
+	
+		describe('Matura', function ($ctx){
+			it('should make writing tests fun', function ($ctx) {
+				expect($are_we_having_fun_yet)->to->eql(true);
+			}))
+		});
+	
+- Heirarchical blocks to drill down from basic to complex assertions.
+		  
+		describe('User', function ($ctx) {
+			describe('Authorization', function ($ctx){
+				describe('OAuth', function ($ctx) {});
+			});
+		});
+		
+- `before`, `before_all`, `after`, `after_all`, hooks with a well-defined ordering.
+ 
+ 		describe('User Database', function ($ctx) {
+ 			foreach(range(1,5) as $repetition) {
+	 			it('should insert a user', function ($ctx){
+	 				$user = $ctx->db->findOne(array(
+	 					'username' => $ctx->username;
+	 				));
+	 				expect($user)->to->have->length(1);
+	 			});
+	 			
+	 			it('should not accumulate users, function ($ctx){
+	 				$users = $ctx->db->find();
+	 				expect($users)->to->have->length(1);
+	 			});
+ 			}
+ 			
+ 			// Executed once for each describe block.
+ 			before_all(function ($ctx){
+ 				$ctx->test_id = uniqid();
+ 				$ctx->test_db = 'DB_'.$ctx->test_id;
+ 				$ctx->db = new Database('localhost', $ctx->test_db);
+ 			});
+ 			
+ 			// Executed prior to each test (including descendants).
+ 			before(function ($ctx){
+ 			 	$ctx->username = 'test_user'.$ctx->test_id.uniqid();
+ 				$ctx->db->insert(array('username' => $ctx->username)); 
+ 			});
+ 			
+ 			// Executed after each test (including descendants);
+ 			after(function ($ctx) {
+ 				$ctx->db->delete(array('username' => $ctx->username));
+ 			});
+ 			
+ 			// Executed once at the very end of this describe block.
+ 			after_all(function ($ctx) {
+ 				$ctx->db->drop($ctx->test_db);
+ 			});
 
-```
-<?php namespace Matura\Test\Examples;
-
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
-
-describe('Simple Example', function ($ctx) {
-    before(function ($ctx) {
-        $bob = new User('bob');
-        $admins = new Group('admins');
-
-        $bob->first_name = 'bob';
-        $bob->group = $admins;
-
-        $ctx->bob = $bob;
-        $ctx->admins = $admins;
-    });
-
-    it('should set the bob user', function ($ctx) {
-        $ctx->sibling_value = 10;
-        expect($ctx->bob)->to->be->a('Matura\Test\Support\User');
-    });
-
-    it('should not inherit a sibling\'s context modifications', function ($ctx) {
-        expect($ctx->sibling_value)->to->be(null);
-    });
-
-    it('should set the admins group', function ($ctx) {
-        expect($ctx->admins)->to->be->a('Matura\Test\Support\Group');
-    });
-
-    it('should skip this test when invoked', function ($ctx) {
-        skip();
-    });
-
-    it('should be strict about undefined variables', function ($ctx) {
-        $arr = array(0);
-        $result = $arr[0] + $arr[1];
-    });
-
-    // Nested blocks help organize tests and allow progressive augmentation of
-    // test context.
-    describe('Inner Block with Before All and Context Clobbering', function ($ctx) {
-        before_all(function ($ctx) {
-            // Do something costly like purge and re-seed a database.
-            $ctx->purged_database = true;
-        });
-
-        before(function ($ctx) {
-            $ctx->admins = new Group('modified_admins');
-        });
-
-        it('should inherit context from outer before blocks', function ($ctx) {
-            expect($ctx->bob)->to->be->a('Matura\Test\Support\User');
-        });
-
-        it('should shadow context variables from outer contexts if assigned', function ($ctx) {
-            expect($ctx->admins->name)->to->eql('modified_admins');
-        });
-    });
-});
-
-```
-![Matura Shell Output](docs/sample_shell_output.png)
-
-## Documentation
-
-Unfortunately, for now: the [tests themselves](test/functional).
-
-* [In what order is everything run?](test/functional/test_ordering.php)
-* [What is that $ctx parameter?](test/functional/test_context.php)
 
 ## The CLI
 
 
-	./mat test <path> [--filter=] [--grep=]
+This is how it looks if you run: `bin/mat test test/examples`.
 
-Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite/file, use `--grep`. Matura will be clever enough to run the requisite before/after hooks - hopefully. This is a bit fresh.
+![Matura Shell Output](docs/sample_shell_output.png)
+
+	bin/mat test <path> [--filter=] [--grep=]
+
+Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite/file, use `--grep`. Matura will be clever enough to run the requisite before/after hooks - hopefully. We're still fairly alpha ;)
+
+## Further Documentation
+
+Unfortunately, for now: the [tests](test/functional) [themselves](test/integration).
+
+* [In what order is everything run?](test/functional/test_ordering.php)
+* [What is that $ctx parameter?](test/functional/test_context.php)
 
 
 ## Naive Todo List
 
 
 * There's currently nothing like PHPUnit's backupGlobals.
-* xit / xdescribe and so on are not tested.
+* xit / xdescribe are skipped, but this is not indicated in the ui.
 * Backtraces annoyingly include calls internal to the framework.
- 
-
-
