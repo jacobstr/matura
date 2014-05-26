@@ -1,7 +1,7 @@
 Matura
 ======
 
-An Rspec / Mocha inspired testing tool for php.
+An RSpec / Mocha inspired testing tool for php.
 
 ---
 
