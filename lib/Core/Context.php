@@ -34,6 +34,23 @@ class Context implements IteratorAggregate
         return null;
     }
 
+    public function __call($name, $arguments)
+    {
+        if (isset($this->context[$name])) {
+            return call_user_func_array($this->context[$name], $arguments);
+        }
+
+        foreach (array_reverse($this->block->getContextChain()) as $context) {
+            if ($context->getImmediate($name) !== null) {
+                // Cache the value.
+                $this->context[$name] = $context->getImmediate($name);
+                return call_user_func_array($this->context[$name], $arguments);
+            }
+        }
+
+        return null;
+    }
+
     public function getImmediate($key)
     {
         return array_key_exists($key, $this->context) ? $this->context[$key] :  null;

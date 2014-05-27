@@ -10,6 +10,9 @@ describe('Context', function ($ctx) {
         $ctx->empty_array = array();
         $ctx->false = false;
         $ctx->user = new User('bob');
+        $ctx->func = function ($value) {
+            return $value;
+        };
     });
 
     before_all(function ($ctx) {
@@ -45,6 +48,10 @@ describe('Context', function ($ctx) {
 
     it('should have a scalar from the once before hook', function ($ctx) {
         expect($ctx->once_before_scalar)->to->be(10);
+    });
+
+    it('should invoke methods', function ($ctx) {
+        expect($ctx->func(5))->to->eql(5);
     });
 
     describe('Nested, Undefined Values', function ($ctx) {
