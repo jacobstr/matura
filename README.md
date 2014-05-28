@@ -95,3 +95,7 @@ Unfortunately, for now: the [tests](test/functional) [themselves](test/integrati
 * There's currently nothing like PHPUnit's backupGlobals.
 * xit / xdescribe are skipped, but this is not indicated in the ui.
 * Backtraces annoyingly include calls internal to the framework.
+
+## Thanks! 
+
+* [Ben Zittlau](https://github.com/benzittlau) - PHPUsable which brings similar syntax to PHPUnit and me think this was a worthwhile diversion.
