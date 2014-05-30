@@ -3,6 +3,8 @@
 use IteratorAggregate;
 use ArrayIterator;
 
+use Matura\Blocks\Methods\TestMethod;
+
 class ResultSet implements ResultComponent, IteratorAggregate
 {
     /**
@@ -38,29 +40,26 @@ class ResultSet implements ResultComponent, IteratorAggregate
 
     public function totalFailures()
     {
-        $sum = 0;
-        foreach ($this as $result) {
-            $sum += $result->totalFailures();
-        }
-        return $sum;
+        return count($this->getWithFilter(function ($result) {
+            $invoked = $result->getInvokedBlock();
+            return $invoked instanceof TestMethod && $result->isFailure();
+        }));
     }
 
     public function totalSkipped()
     {
-        $sum = 0;
-        foreach ($this as $result) {
-            $sum += $result->totalSkipped();
-        }
-        return $sum;
+        return count($this->getWithFilter(function ($result) {
+            $invoked = $result->getInvokedBlock();
+            return $invoked instanceof TestMethod && $result->isSkipped();
+        }));
     }
 
     public function totalSuccesses()
     {
-        $sum = 0;
-        foreach ($this->results as $result) {
-            $sum += $result->totalSuccesses();
-        }
-        return $sum;
+        return count($this->getWithFilter(function ($result) {
+            $invoked = $result->getInvokedBlock();
+            return $invoked instanceof TestMethod && $result->isSuccessful();
+        }));
     }
 
     public function totalTests()
@@ -80,12 +79,9 @@ class ResultSet implements ResultComponent, IteratorAggregate
 
     public function isSuccessful()
     {
-        // Generate exit code based on result set.
-        if ($this->totalFailures() === 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return count($this->getWithFilter(function ($result) {
+            return $result->isFailure();
+        })) == 0;
     }
 
     public function isFailure()
@@ -108,6 +104,15 @@ class ResultSet implements ResultComponent, IteratorAggregate
             $failures = array_merge($failures, $result->getFailures());
         }
         return $failures;
+    }
+
+    public function getWithFilter($fn)
+    {
+        $collection = array();
+        foreach ($this->results as $result) {
+            $collection = array_merge($collection, $result->getWithFilter($fn));
+        }
+        return $collection;
     }
 
     public function getExceptions()

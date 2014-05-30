@@ -106,22 +106,22 @@ class Result implements ResultComponent
 
     public function totalFailures()
     {
-        return $this->isTestMethod() && $this->isFailure() ? 1 : 0;
+        return $this->isFailure() ? 1 : 0;
     }
 
     public function totalIncomplete()
     {
-        return $this->isTestMethod() && $this->isIncomplete() ? 1 : 0;
+        return $this->isIncomplete() ? 1 : 0;
     }
 
     public function totalSuccesses()
     {
-        return $this->isTestMethod() && $this->isSuccessful() ? 1 : 0;
+        return $this->isSuccessful() ? 1 : 0;
     }
 
     public function totalSkipped()
     {
-        return $this->isTestMethod() && $this->isSkipped() ? 1 : 0;
+        return $this->isSkipped() ? 1 : 0;
     }
 
     public function isSuccessful()
@@ -141,7 +141,7 @@ class Result implements ResultComponent
 
     public function isIncomplete()
     {
-        return $this->block->getAssertionCount() == 0;
+        return $this->invoked_block->getAssertionCount() == 0;
     }
 
     public function getFailures()
@@ -151,5 +151,13 @@ class Result implements ResultComponent
         } else {
             return array();
         }
+    }
+
+    public function getWithFilter($fn) {
+      if($fn($this)) {
+          return array($this);
+      } else {
+          return array();
+      }
     }
 }
