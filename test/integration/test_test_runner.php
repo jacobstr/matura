@@ -119,15 +119,15 @@ describe('TestRunner', function ($ctx) {
             $ctx->spy = $spy = Mockery::mock()->shouldIgnoreMissing();
             $ctx->listener = Mockery::mock('Matura\Events\Listener')->shouldIgnoreMissing();
             $ctx->suite = suite('Fixture', function ($inner_ctx) use ($spy, $ctx) {
-                before_all(array($spy, 'before_all'));
-                after_all(array($spy, 'after_all'));
-                after(array($spy, 'after'));
-                before(array($spy, 'before'));
+                $ctx->before_all = before_all(array($spy, 'before_all'));
+                $ctx->after_all = after_all(array($spy, 'after_all'));
+                $ctx->after = after(array($spy, 'after'));
+                $ctx->before = before(array($spy, 'before'));
                 $ctx->describe = describe('Inner', function ($inner_ctx) use ($spy, $ctx) {
-                    before_all(array($spy, 'inner_before_all'));
-                    after_all(array($spy, 'inner_after_all'));
-                    after(array($spy, 'inner_after'));
-                    before(array($spy, 'inner_before'));
+                    $ctx->inner_before_all = before_all(array($spy, 'inner_before_all'));
+                    $ctx->inner_after_all = after_all(array($spy, 'inner_after_all'));
+                    $ctx->inner_after = after(array($spy, 'inner_after'));
+                    $ctx->inner_before = before(array($spy, 'inner_before'));
                     $ctx->test = it('should have a test case', array($spy,'it'));
                 });
             });
@@ -177,7 +177,7 @@ describe('TestRunner', function ($ctx) {
                 $ctx->suite_runner->run();
                 $failures = $ctx->suite_runner->getResultSet()->getFailures();
                 expect($failures)->to->have->length(1);
-                expect($failures[0]->getBlock())->to->be($ctx->test);
+                expect($failures[0]->getBlock())->to->be($ctx->inner_before);
             });
 
             it('should capture test after errors', function ($ctx) {
@@ -185,7 +185,7 @@ describe('TestRunner', function ($ctx) {
                 $ctx->suite_runner->run();
                 $failures = $ctx->suite_runner->getResultSet()->getFailures();
                 expect($failures)->to->have->length(1);
-                expect($failures[0]->getBlock())->to->be($ctx->test);
+                expect($failures[0]->getBlock())->to->be($ctx->inner_after);
             });
         });
 

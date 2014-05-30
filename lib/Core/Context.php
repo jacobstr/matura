@@ -48,7 +48,7 @@ class Context implements IteratorAggregate
             }
         }
 
-        return null;
+        throw new \Exception("Method $name does not exist.");
     }
 
     public function getImmediate($key)

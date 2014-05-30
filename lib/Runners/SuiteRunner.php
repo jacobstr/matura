@@ -58,7 +58,7 @@ class SuiteRunner extends Runner
             )
         );
 
-        $result = $this->runWithCapture(array($this, 'runGroup'), $this->suite);
+        $result = $this->captureAround(array($this, 'runGroup'), $this->suite);
 
         $this->emit(
             'suite.complete',
@@ -87,7 +87,7 @@ class SuiteRunner extends Runner
             )
         );
 
-        $result = $this->runWithCapture(array($this, 'runGroup'), $describe);
+        $result = $this->captureAround(array($this, 'runGroup'), $describe);
 
         $this->emit(
             'describe.complete',
@@ -141,35 +141,31 @@ class SuiteRunner extends Runner
 
         $this->emit('test.start', $start_context);
 
-        $result = $this->runWithCapture(function () use ($test) {
-            $test->traversePost(function ($block) {
-                foreach ($block->befores() as $before) {
-                    $before->invoke();
-                }
-            });
 
-            $test_return_value = $test->invoke();
+        $suite_runner = $this;
+        $test_result_set = new ResultSet();
+        $test->aroundEach(function ($block) use ($suite_runner, $test_result_set, $test) {
+            // Skip once we fail.
+            if($test_result_set->isFailure()) {
+                $block->skip('Skipping due to earlier failures.');
+            }
 
-            $test->traversePre(function ($block) {
-                foreach ($block->afters() as $after) {
-                    $after->invoke();
-                }
-            });
+            $result = $suite_runner->captureAround(array($block, 'invoke'), $block);
 
-            return $test_return_value;
-        }, $test);
+            $test_result_set->addResult($result);
+        });
 
-        $this->result_set->addResult($result);
+        $this->result_set->addResult($test_result_set);
 
         $complete_context = array(
             'test' => $test,
-            'result' => $result,
+            'result' => $test_result_set,
             'result_set' => $this->result_set
         );
 
         $this->emit('test.complete', $complete_context);
 
-        return $result;
+        return $test_result_set;
     }
 
     /**
@@ -178,9 +174,11 @@ class SuiteRunner extends Runner
      *
      * (before_all and after_all hooks are owned by their encompassing Describe)
      *
+     * public because @bindshim
+     *
      * @return Result
      */
-    protected function runWithCapture($fn, Block $owner)
+    public function captureAround($fn, Block $owner)
     {
         try {
             $return_value = call_user_func($fn, $owner);

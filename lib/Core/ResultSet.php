@@ -118,4 +118,33 @@ class ResultSet implements ResultComponent, IteratorAggregate
         }
         return $exceptions;
     }
+
+    public function getStatus()
+    {
+        if($this->isFailure()) {
+            return Result::FAILURE;
+        } else if($this->isSkipped()) {
+            return Result::SKIPPED;
+        } else if($this->isSuccessful()) { // isSuccess seems more correct.
+            return Result::SUCCESS;
+        } else {
+            return Result::INCOMPLETE;
+        }
+    }
+
+    public function getStatusString()
+    {
+        switch($this->getStatus()) {
+            case Result::SUCCESS:
+                return 'success';
+            case Result::FAILURE:
+                return 'failure';
+            case Result::SKIPPED:
+                return 'skipped';
+            case Result::INCOMPLETE:
+                return 'incomplete';
+            default:
+                return null;
+        }
+    }
 }

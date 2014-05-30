@@ -74,9 +74,14 @@ class Result implements ResultComponent
         }
     }
 
+    public function isTestMethod()
+    {
+        return $this->owning_block && ($this->owning_block instanceof TestMethod);
+    }
+
     public function totalTests()
     {
-        return $this->owning_block && ($this->owning_block instanceof TestMethod)  ? 1 : 0;
+        return $this->isTestMethod() ? 1 : 0;
     }
 
     public function totalAssertions()
@@ -86,22 +91,22 @@ class Result implements ResultComponent
 
     public function totalFailures()
     {
-        return $this->isFailure() ? 1 : 0;
+        return $this->isTestMethod() && $this->isFailure() ? 1 : 0;
     }
 
     public function totalIncomplete()
     {
-        return $this->isIncomplete() ? 1 : 0;
+        return $this->isTestMethod() && $this->isIncomplete() ? 1 : 0;
     }
 
     public function totalSuccesses()
     {
-        return $this->isSuccessful() ? 1 : 0;
+        return $this->isTestMethod() && $this->isSuccessful() ? 1 : 0;
     }
 
     public function totalSkipped()
     {
-        return $this->isSkipped() ? 1 : 0;
+        return $this->isTestMethod() && $this->isSkipped() ? 1 : 0;
     }
 
     public function isSuccessful()

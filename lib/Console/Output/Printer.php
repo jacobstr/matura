@@ -8,18 +8,18 @@ use Matura\Blocks\Suite;
 use Matura\Blocks\Describe;
 use Matura\Exceptions\Exception as MaturaException;
 
-function indent_width(Block $block)
+function indent_width(Block $block, $per_level = 1)
 {
     $level = $block->depth() - 1;
-    return $level*2 - 1;
+    return ($level * $per_level);
 }
 
-function indent($amt, $string)
+function indent($lvl, $string, $per_level = 1)
 {
     if (empty($string)) {
         return '';
     } else {
-        $indent = str_repeat(" ", $amt);
+        $indent = str_repeat(" ", $lvl*1);
         return $indent.implode(explode("\n", $string), "\n".$indent);
     }
 }
@@ -47,7 +47,8 @@ function pad_right($length, $string, $char = ' ')
 class Printer
 {
     protected $options = array(
-        'trace_depth' => 7
+        'trace_depth' => 7,
+        'indent' => 3
     );
 
     protected $test_count = 0;
@@ -133,16 +134,16 @@ class Printer
     public function onDescribeStart(Event $event)
     {
         $name = $event->describe->getName();
-        $indent_width = ($event->describe->depth() - 1) * 2;
-        return indent($indent_width, "<bold>$name </bold>");
+        $indent_width = ($event->describe->depth() - 1) * $this->options['indent'];
+        return indent($indent_width, "<bold>$name </bold>", $this->options['indent']);
     }
 
     public function onDescribeComplete(Event $event)
     {
         if ($event->result->isFailure()) {
             $name = $event->describe->getName();
-            $indent_width = ($event->describe->depth() - 1) * 2;
-            return indent($indent_width, "<failure>Describe $name Failed</failure>");
+            $indent_width = ($event->describe->depth() - 1) * $this->options['indent'];
+            return indent($indent_width, "<failure>Describe $name Failed</failure>", $this->options['indent']);
         }
     }
 
