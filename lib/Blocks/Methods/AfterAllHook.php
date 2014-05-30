@@ -2,5 +2,5 @@
 
 class AfterAllHook extends HookMethod
 {
-
+    protected $name = 'after_all';
 }

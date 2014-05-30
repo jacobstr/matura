@@ -16,6 +16,11 @@ class Result implements ResultComponent
     protected $owning_block;
 
     /**
+     * @var Block $owning_block The block that was invoked for the result.
+     */
+    protected $invoked_block;
+
+    /**
      * @var int $status The status code for a test.
      *
      * 0 - failed
@@ -27,16 +32,26 @@ class Result implements ResultComponent
     /** @var mixed $result The return value or Exception raised by a test. */
     protected $result = null;
 
-    public function __construct(Block $owning_block, $status, $returned)
+    public function __construct(Block $owning_block, Block $invoked_block, $status, $returned)
     {
-        $this->owning_block = $owning_block;
-        $this->status       = $status;
-        $this->returned     = $returned;
+        $this->owning_block  = $owning_block;
+        $this->invoked_block = $invoked_block;
+        $this->status        = $status;
+        $this->returned      = $returned;
     }
 
     public function getBlock()
     {
         return $this->owning_block;
+    }
+
+    /**
+     * E.g. a before method failure will be owned by it's triggering test. The
+     * invoked block will still be the before method.
+     */
+    public function getInvokedBlock()
+    {
+        return $this->invoked_block;
     }
 
     public function getStatus()
@@ -76,7 +91,7 @@ class Result implements ResultComponent
 
     public function isTestMethod()
     {
-        return $this->owning_block && ($this->owning_block instanceof TestMethod);
+        return $this->invoked_block && ($this->invoked_block instanceof TestMethod);
     }
 
     public function totalTests()
@@ -86,7 +101,7 @@ class Result implements ResultComponent
 
     public function totalAssertions()
     {
-        return $this->owning_block->getAssertionCount();
+        return $this->invoked_block->getAssertionCount();
     }
 
     public function totalFailures()

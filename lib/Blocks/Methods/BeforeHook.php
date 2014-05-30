@@ -2,5 +2,5 @@
 
 class BeforeHook extends HookMethod
 {
-
+    protected $name = 'before';
 }

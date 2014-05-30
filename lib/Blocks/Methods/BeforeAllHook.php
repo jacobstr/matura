@@ -2,6 +2,8 @@
 
 class BeforeAllHook extends HookMethod
 {
+    protected $name = 'before all';
+
     protected $result;
     protected $invoked;
 

@@ -177,7 +177,7 @@ describe('TestRunner', function ($ctx) {
                 $ctx->suite_runner->run();
                 $failures = $ctx->suite_runner->getResultSet()->getFailures();
                 expect($failures)->to->have->length(1);
-                expect($failures[0]->getBlock())->to->be($ctx->inner_before);
+                expect($failures[0]->getBlock())->to->be($ctx->test);
             });
 
             it('should capture test after errors', function ($ctx) {
@@ -185,7 +185,7 @@ describe('TestRunner', function ($ctx) {
                 $ctx->suite_runner->run();
                 $failures = $ctx->suite_runner->getResultSet()->getFailures();
                 expect($failures)->to->have->length(1);
-                expect($failures[0]->getBlock())->to->be($ctx->inner_after);
+                expect($failures[0]->getBlock())->to->be($ctx->test);
             });
         });
 

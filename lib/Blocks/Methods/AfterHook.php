@@ -2,5 +2,5 @@
 
 class AfterHook extends HookMethod
 {
-
+    protected $name = 'after';
 }

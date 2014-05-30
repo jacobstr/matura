@@ -58,7 +58,7 @@ class SuiteRunner extends Runner
             )
         );
 
-        $result = $this->captureAround(array($this, 'runGroup'), $this->suite);
+        $result = $this->captureAround(array($this, 'runGroup'), $this->suite, $this->suite);
 
         $this->emit(
             'suite.complete',
@@ -87,7 +87,7 @@ class SuiteRunner extends Runner
             )
         );
 
-        $result = $this->captureAround(array($this, 'runGroup'), $describe);
+        $result = $this->captureAround(array($this, 'runGroup'), $describe, $describe);
 
         $this->emit(
             'describe.complete',
@@ -150,7 +150,7 @@ class SuiteRunner extends Runner
                 $block->skip('Skipping due to earlier failures.');
             }
 
-            $result = $suite_runner->captureAround(array($block, 'invoke'), $block);
+            $result = $suite_runner->captureAround(array($block, 'invoke'), $test, $block);
 
             $test_result_set->addResult($result);
         });
@@ -178,10 +178,10 @@ class SuiteRunner extends Runner
      *
      * @return Result
      */
-    public function captureAround($fn, Block $owner)
+    public function captureAround($fn, Block $owner, Block $invoked)
     {
         try {
-            $return_value = call_user_func($fn, $owner);
+            $return_value = call_user_func($fn, $owner, $invoked);
             $status = Result::SUCCESS;
         } catch (EsperanceError $e) {
             $status = Result::FAILURE;
@@ -194,7 +194,7 @@ class SuiteRunner extends Runner
             $return_value = new MaturaException($e->getMessage(), $e->getCode(), $e);
         }
 
-        return new Result($owner, $status, $return_value);
+        return new Result($owner, $invoked, $status, $return_value);
     }
 
     /**
