@@ -18,7 +18,7 @@ An RSpec / Mocha inspired testing tool for php.
 		describe('Matura', function ($ctx){
 			it('should make writing tests fun', function ($ctx) {
 				expect($are_we_having_fun_yet)->to->eql(true);
-			}))
+			});
 		});
 	
 - Heirarchical blocks to drill down from basic to complex assertions.
