@@ -2,7 +2,6 @@
     "name": "jacobstr/matura",
     "description": "A mocha/rspec inspired testing framework for php.",
     "license": "MIT",
-    "minimum-stability": "dev",
     "authors": [
         {
             "name": "jacobstr",
