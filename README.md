@@ -95,6 +95,7 @@ Unfortunately, for now: the [tests](test/functional) [themselves](test/integrati
 * There's currently nothing like PHPUnit's backupGlobals.
 * xit / xdescribe are skipped, but this is not indicated in the ui.
 * Backtraces annoyingly include calls internal to the framework.
+* I'm a fan of [contract tests](http://c2.com/cgi/wiki?AbstractTestCases). Class-based tests seem better suited to them, however so I'm in need of inspiration wrt to the callback-driven dsl that matura uses.
 
 ## Thanks!
 
