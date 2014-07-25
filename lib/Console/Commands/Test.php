@@ -21,6 +21,12 @@ use Matura\Matura;
 
 class Test extends Command implements Listener
 {
+    private $defaults = array(
+        'trace_depth' => 7,
+        'filter'      => '.*',
+        'grep'        => '.*'
+    );
+
     protected function configure()
     {
         $this
@@ -99,13 +105,13 @@ class Test extends Command implements Listener
         $path = $input->getArgument('path');
 
         $printer_options = array(
-            'trace_depth' => $input->getOption('trace_depth') ?: 7
+            'trace_depth' => $input->getOption('trace_depth') ?: $this->defaults['trace_depth']
         );
 
-        $filter = $input->getOption('filter') ?: '.*';
+        $filter = $input->getOption('filter') ?: $this->defaults['filter'];
         $filter = "/$filter/i";
 
-        $grep = $input->getOption('grep') ?: '.*';
+        $grep = $input->getOption('grep') ?: $this->defaults['grep'];
         $grep = "/$grep/i";
 
         // Configure Output Modules

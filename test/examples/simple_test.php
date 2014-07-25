@@ -32,6 +32,7 @@ describe('Simple Example', function ($ctx) {
         skip();
     });
 
+    // This test is expected to fail.
     it('should be strict about undefined variables', function ($ctx) {
         $arr = array(0);
         $result = $arr[0] + $arr[1];
