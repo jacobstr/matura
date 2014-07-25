@@ -84,21 +84,21 @@
         },
         {
             "name": "jacobstr/esperance",
-            "version": "v0.1.1",
+            "version": "v0.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/jacobstr/esperance.git",
-                "reference": "ab88735c3db436a71356828394f9086448735c74"
+                "reference": "c60bba80423badebb0902a1998d8fce7bc1dc500"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jacobstr/esperance/zipball/ab88735c3db436a71356828394f9086448735c74",
-                "reference": "ab88735c3db436a71356828394f9086448735c74",
+                "url": "https://api.github.com/repos/jacobstr/esperance/zipball/c60bba80423badebb0902a1998d8fce7bc1dc500",
+                "reference": "c60bba80423badebb0902a1998d8fce7bc1dc500",
                 "shasum": ""
             },
             "require": {
-                "evenement/evenement": "1.*",
-                "jacobstr/dumpling": "0.0.*",
+                "evenement/evenement": "~1.0",
+                "jacobstr/dumpling": "~0.0.3",
                 "php": ">=5.3.2"
             },
             "type": "library",
@@ -117,7 +117,7 @@
                 "TDD",
                 "assertion"
             ],
-            "time": "2014-07-25 00:00:49"
+            "time": "2014-07-25 00:16:29"
         },
         {
             "name": "symfony/console",
