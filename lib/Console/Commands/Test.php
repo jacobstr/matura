@@ -102,8 +102,11 @@ class Test extends Command implements Listener
             'trace_depth' => $input->getOption('trace_depth') ?: 7
         );
 
-        $filter = $input->getOption('filter') ?: '/.*/i';
-        $grep = $input->getOption('grep') ?: '/.*/i';
+        $filter = $input->getOption('filter') ?: '.*';
+        $filter = "/$filter/i";
+
+        $grep = $input->getOption('grep') ?: '.*';
+        $grep = "/$grep/i";
 
         // Configure Output Modules
         // ########################
