@@ -10,10 +10,11 @@
     ],
     "bin" : [ "bin/mat" ],
     "require": {
-        "jacobstr/esperance": "dev-master",
-        "jacobstr/dumpling": "dev-master",
-        "mockery/mockery": "dev-master",
-        "symfony/console": "dev-master"
+        "jacobstr/esperance": "0.1.*",
+        "symfony/console": "2.5.*"
+    },
+    "require-dev": {
+        "mockery/mockery": "dev-master"
     },
     "autoload" : {
         "psr-4": {
