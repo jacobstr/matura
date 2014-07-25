@@ -10,8 +10,8 @@
     ],
     "bin" : [ "bin/mat" ],
     "require": {
-        "jacobstr/esperance": "0.1.*",
-        "symfony/console": "2.5.*"
+        "jacobstr/esperance": "~0.1",
+        "symfony/console": "~2.5"
     },
     "require-dev": {
         "mockery/mockery": "dev-master"
