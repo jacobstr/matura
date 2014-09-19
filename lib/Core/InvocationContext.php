@@ -1,5 +1,6 @@
 <?php namespace Matura\Core;
 
+use Matura\Exceptions\Exception;
 use Matura\Blocks\Block;
 use Matura\Core\InvocationContext;
 
@@ -101,5 +102,19 @@ class InvocationContext
     public static function getActive()
     {
         return static::$active_invocation_context;
+    }
+
+    /**
+     * Obtains the current active block and asserts that it is a given type. Used
+     * to enforce block nested rules for the DSL.
+     */
+    public static function getAndAssertActiveBlock($type)
+    {
+        $active_block = static::getActive();
+        $current = get_class($active_block->activeBlock());
+        if ( !is_a($active_block->activeBlock(), $type)) {
+            throw new Exception("Improperly nested block. Expected a $type, got a $current");
+        }
+        return $active_block;
     }
 }

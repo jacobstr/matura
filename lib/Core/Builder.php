@@ -17,17 +17,17 @@ use Matura\Blocks\Methods\AfterHook;
 use Matura\Blocks\Methods\AfterAllHook;
 
 /**
- * Enables the callback based sugar api to work the way it does. It maintains
- * and actually executes the methods defined in the global DSL in function.php.
+ * Enables the callback based "sugar" api to work the way it does. It maintains
+ * and actually executes the methods defined in the global DSL in functions.php.
  */
 class Builder
 {
     // DSL Dispatch
     // ############
     //
-    // The global functions defined in functions.inc.php delegate to
+    // The global functions defined in functions.php delegate to
     // corresponding methods in the builder object. The syntactic sugar leans
-    // on some clever tricks driven by a the interaction of the Builder and the
+    // on some clever tricks driven by the interaction of the Builder and the
     // InvocationContext.
 
     /**
@@ -52,6 +52,10 @@ class Builder
         throw new SkippedException($message);
     }
 
+    /**
+     * Begins a new 'describe' block. The callback $fn is invoked when the test
+     * suite is run.
+     */
     public static function describe($name, $fn)
     {
         $next = new Describe(InvocationContext::getActive(), $fn, $name);
@@ -59,6 +63,10 @@ class Builder
         return $next;
     }
 
+    /**
+     * Begins a new test suite. The test suite instantiates a new invocation
+     * context.
+     */
     public static function suite($name, $fn)
     {
         $suite = new Suite(new InvocationContext(), $fn, $name);
@@ -66,13 +74,21 @@ class Builder
         return $suite;
     }
 
+    /**
+     * Begins a new test case within the active block.
+     */
     public static function it($name, $fn)
     {
-        $test_method = new TestMethod(InvocationContext::getActive(), $fn, $name);
+        $active_block = InvocationContext::getAndAssertActiveBlock('Matura\Blocks\Describe');
+        $test_method = new TestMethod($active_block, $fn, $name);
         $test_method->addToParent();
         return $test_method;
     }
 
+    /**
+     * Adds a before callback to the active block. The active block should be
+     * a describe block.
+     */
     public static function before($fn)
     {
         $test_method = new BeforeHook(InvocationContext::getActive(), $fn);
@@ -80,6 +96,10 @@ class Builder
         return $test_method;
     }
 
+    /**
+     * Adds a before_all callback to the active block. The active block should
+     * generally be a describe block.
+     */
     public static function before_all($fn)
     {
         $test_method = new BeforeAllHook(InvocationContext::getActive(), $fn);
