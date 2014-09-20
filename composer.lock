@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "872bd2c2002027c19be26c65a2e5b984",
+    "hash": "34645ef0324ba152aafbd21c90c48452",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -243,13 +243,57 @@
                 "testing"
             ],
             "time": "2014-07-23 18:59:52"
+        },
+        {
+            "name": "mover-io/belt",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mover-io/belt.git",
+                "reference": "6706db677dcbf439cfe36687a0ca71b0fae20f7b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mover-io/belt/zipball/6706db677dcbf439cfe36687a0ca71b0fae20f7b",
+                "reference": "6706db677dcbf439cfe36687a0ca71b0fae20f7b",
+                "shasum": ""
+            },
+            "require-dev": {
+                "mover-io/phpusable-phpunit": "dev-master"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Belt\\": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jacob Straszynski",
+                    "homepage": "https://github.com/jacobstr"
+                }
+            ],
+            "description": "A utility belt",
+            "time": "2014-09-19 19:15:26"
         }
     ],
-    "aliases": [],
+    "aliases": [
+
+    ],
     "minimum-stability": "stable",
     "stability-flags": {
-        "mockery/mockery": 20
+        "mockery/mockery": 20,
+        "mover-io/belt": 20
     },
-    "platform": [],
-    "platform-dev": []
+    "prefer-stable": false,
+    "platform": [
+
+    ],
+    "platform-dev": [
+
+    ]
 }

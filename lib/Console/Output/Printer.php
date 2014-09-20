@@ -61,9 +61,11 @@ class Printer
     public function onTestComplete(Event $event)
     {
         $index        = $this->test_count;
+
         // Via TestMethod
         $indent_width = ($event->test->depth() - 1) * 2;
         $name         = $event->test->getName();
+
         // Via Result
         $style        = $event->result->getStatusString();
         $status       = $event->result->getStatus();
@@ -109,9 +111,12 @@ class Printer
             $index++;
             $result[] = tag("failure", pad_right(4, "$index )")."FAILURE: ". $failure->getBlock()->path());
             $result[] = $this->formatFailure($index, $failure);
+            $result[] = "";
         }
 
-        return $summary . "\n\n" . implode("\n", $result);
+        $result[] = $summary;
+
+        return implode("\n", $result);
     }
 
     public function onTestStart(Event $event)

@@ -5,10 +5,10 @@ use Matura\Blocks\Methods\TestMethod;
 
 class Result implements ResultComponent
 {
-    const INCOMPLETE = 4;
-    const SUCCESS    = 2;
-    const SKIPPED    = 1;
-    const FAILURE    = 0;
+    const INCOMPLETE = 'I';
+    const SUCCESS    = 'S';
+    const SKIPPED    = 'K';
+    const FAILURE    = 'F';
 
     /**
      * @var Block $owning_block The block that created us.

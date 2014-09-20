@@ -91,10 +91,7 @@ class ResultSet implements ResultComponent, IteratorAggregate
 
     public function isSkipped()
     {
-        // Need to think about this along with before all and after all failures
-        // which are the most likely candidates for issues failures during
-        // a result set invocation context.
-        return false;
+      return $this->totalSkipped() > 0;
     }
 
     public function getFailures()

@@ -227,6 +227,7 @@ class SuiteRunner extends Runner
             return $filtered;
         };
 
+        // Code smell. Consider moving this responsibility to the blocks.
         if ($block instanceof TestMethod) {
             return $isFiltered($block);
         } else {
