@@ -78,7 +78,10 @@ This is how it looks if you run: `bin/mat test test/examples`.
 
 	bin/mat test <path> [--filter=] [--grep=]
 
-Tests can be filtered by filename using the `--filter` option. If you wish to filter specific tests within a suite/file, use `--grep`. Matura will be clever enough to run the requisite before/after hooks - hopefully. We're still fairly alpha ;)
+Tests can be filtered by filename using the `--filter` option. If you wish to
+filter specific tests within a suite/file, use `--grep`. Matura will be clever
+enough to run the requisite before/after hooks - hopefully. We're still fairly
+alpha ;)
 
 ## Further Documentation
 
@@ -87,15 +90,17 @@ Unfortunately, for now: the [tests](test/functional) [themselves](test/integrati
 * [In what order is everything run?](test/functional/test_ordering.php)
 * [What is that $ctx parameter?](test/functional/test_context.php)
 
-
 ## Naive Todo List
 
-
-* There's currently nothing like PHPUnit's backupGlobals.
-* xit / xdescribe are skipped, but this is not indicated in the ui.
+* There's currently nothing like PHPUnit's backupGlobals. Maybe there shouldn't
+  be - I feel a better way to find inadvertent coupling / dependencies on global
+  variables may be to add functionality that randomizes test ordering.
 * Backtraces annoyingly include calls internal to the framework.
-* I'm a fan of [contract tests](http://c2.com/cgi/wiki?AbstractTestCases). Class-based tests seem better suited to them, however so I'm in need of inspiration wrt to the callback-driven dsl that matura uses.
+* I'm a fan of [contract tests](http://c2.com/cgi/wiki?AbstractTestCases).
+  Class-based tests seem better suited to them, however so I'm in need of
+  inspiration wrt to the callback-driven dsl that matura uses.
 
 ## Thanks!
 
-* [Ben Zittlau](https://github.com/benzittlau) - PHPUsable which brings similar syntax to PHPUnit. Helped me realize this was a worthwhile diversion.
+* [Ben Zittlau](https://github.com/benzittlau) - PHPUsable which brings similar
+   syntax to PHPUnit. Helped me realize this was a worthwhile diversion.
