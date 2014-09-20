@@ -22,5 +22,8 @@
             "Matura\\": "lib",
             "Matura\\Test\\": "test"
         }
+    },
+    "scripts": {
+        "test": "bin/mat test test/functional && bin/mat test test/integration"
     }
 }

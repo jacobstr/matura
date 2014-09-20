@@ -2,6 +2,7 @@
 
 use Matura\Test\Support\User;
 use Matura\Test\Support\Group;
+use Exception;
 
 describe('Simple Example', function ($ctx) {
     before(function ($ctx) {
@@ -32,7 +33,7 @@ describe('Simple Example', function ($ctx) {
         skip();
     });
 
-    xit('should be strict about undefined variables', function ($ctx) {
+    it('should be strict about undefined variables', function ($ctx) {
         $arr = array(0);
         $result = $arr[0] + $arr[1];
     });
@@ -60,7 +61,7 @@ describe('Simple Example', function ($ctx) {
 
     xdescribe('Skipped Block', function ($ctx) {
       it('should skip me because my block has been marked skipped', function ($ctx) {
-
+          throw new Exception('I should not be invoked');
       });
     });
 });

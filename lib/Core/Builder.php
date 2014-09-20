@@ -36,10 +36,14 @@ class Builder
      */
     public static function expect($obj)
     {
-        $expect_method = new ExpectMethod(InvocationContext::getActive(), function ($ctx) use (&$obj) {
-            // Should, perhaps be configurable.
-            return new \Esperance\Assertion($obj);
-        });
+        $expect_method = new ExpectMethod(
+            InvocationContext::getActive(),
+            function ($ctx) use (&$obj) {
+                // Should, perhaps be configurable.
+                return new \Esperance\Assertion($obj);
+            }
+        );
+
         $expect_method->closestTest()->addAssertion();
         return $expect_method->invoke();
     }
@@ -130,11 +134,11 @@ class Builder
     {
         list($name, $skip) = self::getNameAndSkipFlag($name);
 
-        if($skip) {
-            return;
-        }
-
         $block = call_user_func_array(array('static', $name), $arguments);
+
+        if ($skip) {
+            $block->skip('x-ed out');
+        }
 
         return $block;
     }

@@ -32,6 +32,9 @@ describe('Simple Example', function ($ctx) {
         skip();
     });
 
+    xit('should skip this test when constructed', function ($ctx) {
+    });
+
     // This test is expected to fail.
     it('should be strict about undefined variables', function ($ctx) {
         $arr = array(0);

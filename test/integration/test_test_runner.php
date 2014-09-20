@@ -210,15 +210,15 @@ describe('TestRunner', function ($ctx) {
         });
 
         it('should run all tests', function ($ctx) {
-            expect($ctx->result->totalTests())->to->eql(6);
+            expect($ctx->result->totalTests())->to->eql(8);
         });
 
         it('should skip 2 tests', function ($ctx) {
-            expect($ctx->result->totalSkipped())->to->eql(1);
+            expect($ctx->result->totalSkipped())->to->eql(2);
         });
 
         it('should fail 1 test', function ($ctx) {
-            expect($ctx->result->totalSkipped())->to->eql(1);
+            expect($ctx->result->totalFailures())->to->eql(1);
         });
 
         it('will only count executed assertions', function ($ctx) {

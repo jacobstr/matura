@@ -66,9 +66,29 @@ abstract class Block
         return $this;
     }
 
+    /**
+     * Whether this Block has been marked for skipping.
+     *
+     * @return bool
+     */
     public function isSkipped()
     {
         return $this->skipped;
+    }
+
+    /**
+     * Whether this Block or any of it's ancestors have been marked skipped.
+     *
+     * @return bool
+     */
+    public function hasSkippedAncestors()
+    {
+        foreach($this->ancestors() as $ancestor) {
+            if ($ancestor->isSkipped()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Test Context Management

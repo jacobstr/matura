@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "34645ef0324ba152aafbd21c90c48452",
+    "hash": "b91e9d06bba8b995569a72fbe43a65d4",
     "packages": [
         {
             "name": "evenement/evenement",
@@ -121,17 +121,17 @@
         },
         {
             "name": "symfony/console",
-            "version": "v2.5.2",
+            "version": "v2.5.4",
             "target-dir": "Symfony/Component/Console",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/Console.git",
-                "reference": "386fa63407805959bd2c5fe540294721ad4224c8"
+                "reference": "748beed2a1e73179c3f5154d33fe6ae100c1aeb1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Console/zipball/386fa63407805959bd2c5fe540294721ad4224c8",
-                "reference": "386fa63407805959bd2c5fe540294721ad4224c8",
+                "url": "https://api.github.com/repos/symfony/Console/zipball/748beed2a1e73179c3f5154d33fe6ae100c1aeb1",
+                "reference": "748beed2a1e73179c3f5154d33fe6ae100c1aeb1",
                 "shasum": ""
             },
             "require": {
@@ -162,19 +162,17 @@
             ],
             "authors": [
                 {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com",
-                    "homepage": "http://fabien.potencier.org",
-                    "role": "Lead Developer"
-                },
-                {
                     "name": "Symfony Community",
                     "homepage": "http://symfony.com/contributors"
+                },
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
                 }
             ],
             "description": "Symfony Console Component",
             "homepage": "http://symfony.com",
-            "time": "2014-07-15 14:15:12"
+            "time": "2014-08-14 16:10:54"
         }
     ],
     "packages-dev": [
@@ -281,19 +279,13 @@
             "time": "2014-09-19 19:15:26"
         }
     ],
-    "aliases": [
-
-    ],
+    "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
         "mockery/mockery": 20,
         "mover-io/belt": 20
     },
     "prefer-stable": false,
-    "platform": [
-
-    ],
-    "platform-dev": [
-
-    ]
+    "platform": [],
+    "platform-dev": []
 }
