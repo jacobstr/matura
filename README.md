@@ -7,7 +7,7 @@ An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
 
 ## Installation
 
-1. `composer require "jacobstr/matura ~0.1"`
+1. `composer require "jacobstr/matura ~0.2"`
 
 ## Features
 
