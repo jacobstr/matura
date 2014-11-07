@@ -1,8 +1,8 @@
-<?php namespace Matura\Test;
+<?php namespace Matura\Tests;
 
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
-use Matura\Test\Support\Spy;
+use Matura\Test\User;
+use Matura\Test\Group;
+use Matura\Test\Spy;
 
 use Matura\Runners\SuiteRunner;
 use Matura\Core\ResultSet;

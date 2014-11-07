@@ -58,7 +58,7 @@ class Matura
      *
      * @return string The code that was dumped into functions.php.
      */
-    public static function generateDSL($target_namespace = '', $method_prefix = '')
+    public static function generateDSL($target_namespace = 'Matura\Tests', $method_prefix = '')
     {
         $generate_method = function ($name) use ($method_prefix) {
 
