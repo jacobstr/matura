@@ -1,4 +1,4 @@
-<?php namespace Matura\Test\SelfHosted;
+<?php namespace Matura\Tests;
 
 use Matura\Runners\TestRunner;
 use Matura\Runners\SuiteRunner;
@@ -9,20 +9,23 @@ use Mockery;
 describe('TestRunner', function ($ctx) {
 
     // Tests this directory structure, under a TestRunner.
-    // ▾ fake_folders/
-    //   ▾ subfolder/
-    //       sub_folder_test.php
-    //     another_fake_test.php
-    //     fake_test.php
-    //     not_a_test.txt
+    // ├── fake_folders
+    // │   ├── not_a_test.txt
+    // │   ├── subfolder
+    // │   │   └── test_sub_folder_test.php
+    // │   ├── test_another_fake_test.php
+    // │   └── test_fake_test.php
+    // └── tests
+    //     ├── test_dynamically_generated_test.php
+    //     └── test_failing_and_skipping_test.php
 
     after(function ($ctx) {
         Mockery::close();
     });
 
-    describe('Filtering', function ($ctx) {
+    describe('Inclusion', function ($ctx) {
         before(function ($ctx) {
-            $ctx->fixture_folder = __DIR__.'/../fixtures/fake_folders/';
+            $ctx->fixture_folder = __DIR__.'/../../support/fixtures/fake_folders/';
         });
 
         describe('Unfiltered', function ($ctx) {
@@ -38,7 +41,7 @@ describe('TestRunner', function ($ctx) {
 
         describe('Filtered', function ($ctx) {
             before(function ($ctx) {
-                $ctx->runner = new TestRunner($ctx->fixture_folder, array('filter' => '/\/fake(\w|\.)*$/'));
+                $ctx->runner = new TestRunner($ctx->fixture_folder, array('include' => '/^test_fake/'));
             });
 
             it('should only include files that start with `fake`.', function ($ctx) {
@@ -48,10 +51,24 @@ describe('TestRunner', function ($ctx) {
         });
     });
 
+    describe('Exclusion', function ($ctx) {
+        before(function ($ctx) {
+            $ctx->fixture_folder = __DIR__.'/../../support/fixtures/exclude/';
+            $ctx->runner = new TestRunner($ctx->fixture_folder, array('exclude' => '/^test_exclude/'));
+        });
+
+        it('should only exclude files that start with `test_exclude`.', function ($ctx) {
+            $files = iterator_to_array($ctx->runner->collectFiles());
+            expect($files)->to->have->length(1);
+            $file = array_pop($files);
+            expect($file->getBaseName())->to->eql('test_include.php');
+        });
+    });
+
     describe('Grepping', function ($ctx) {
         before(function ($ctx) {
-            $ctx->fixture_folder = __DIR__.'/../fixtures/tests/';
-            $ctx->test_file = $ctx->fixture_folder . '/dynamically_generated_test.php';
+            $ctx->fixture_folder = __DIR__.'/../../support/fixtures/tests/';
+            $ctx->test_file = $ctx->fixture_folder . '/test_dynamically_generated_test.php';
         });
 
         describe('Ungrepped', function ($ctx) {
@@ -203,8 +220,8 @@ describe('TestRunner', function ($ctx) {
 
     describe('End to End', function ($ctx) {
         before(function ($ctx) {
-            $ctx->fixture_folder = __DIR__.'/../fixtures/tests/';
-            $ctx->test_file = $ctx->fixture_folder . '/failing_and_skipping_test.php';
+            $ctx->fixture_folder = __DIR__.'/../../support/fixtures/tests/';
+            $ctx->test_file = $ctx->fixture_folder . '/test_failing_and_skipping_test.php';
             $ctx->runner = new TestRunner($ctx->test_file);
             $ctx->result = $ctx->runner->run();
         });

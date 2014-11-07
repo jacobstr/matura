@@ -20,10 +20,10 @@
     "autoload" : {
         "psr-4": {
             "Matura\\": "lib",
-            "Matura\\Test\\": "test"
+            "Matura\\Test\\": "support/lib"
         }
     },
     "scripts": {
-        "test": "bin/mat test test/functional && bin/mat test test/integration"
+        "test": "bin/mat test test"
     }
 }

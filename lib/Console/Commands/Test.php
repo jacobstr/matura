@@ -22,9 +22,7 @@ use Matura\Matura;
 class Test extends Command implements Listener
 {
     private $defaults = array(
-        'trace_depth' => 7,
-        'filter'      => '.*',
-        'grep'        => '.*'
+        'trace_depth' => 7
     );
 
     protected function configure()
@@ -40,19 +38,25 @@ class Test extends Command implements Listener
             ->addOption(
                 'grep',
                 'g',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Filter individual test cases by a description regexp.'
             )
             ->addOption(
-                'filter',
-                'f',
-                InputOption::VALUE_OPTIONAL,
-                'Filter test files by a filename regexp.'
+                'include',
+                'i',
+                InputOption::VALUE_REQUIRED,
+                'Include test files by a basename(filename) regexp.'
+            )
+            ->addOption(
+                'exclude',
+                'x',
+                InputOption::VALUE_REQUIRED,
+                'Exclude test files by a basename(filename) regexp.'
             )
             ->addOption(
                 'trace_depth',
                 'd',
-                InputOption::VALUE_OPTIONAL,
+                InputOption::VALUE_REQUIRED,
                 'Set the depth of printed stack traces.'
             );
     }
@@ -108,12 +112,6 @@ class Test extends Command implements Listener
             'trace_depth' => $input->getOption('trace_depth') ?: $this->defaults['trace_depth']
         );
 
-        $filter = $input->getOption('filter') ?: $this->defaults['filter'];
-        $filter = "/$filter/i";
-
-        $grep = $input->getOption('grep') ?: $this->defaults['grep'];
-        $grep = "/$grep/i";
-
         // Configure Output Modules
         // ########################
         $printer = new Printer($printer_options);
@@ -122,13 +120,24 @@ class Test extends Command implements Listener
         $this->output = $output;
         $this->printer = $printer;
 
+        $options = array();
+
+        if ($include = $input->getOption('include')) {
+            $options['include'] = "/$include/";
+        }
+
+        if ($match = $input->getOption('exclude')) {
+            $options['exclude'] = "/$exclude/";
+        }
+
+        if ($grep = $input->getOption('grep')) {
+            $options['grep'] = "/$grep/i";
+        }
+
         // Bootstrap and Run
         // #################
 
-        $test_runner = new TestRunner($path, array(
-            'filter' => $filter,
-            'grep' => $grep
-        ));
+        $test_runner = new TestRunner($path, $options);
 
         $test_runner->addListener($this);
 

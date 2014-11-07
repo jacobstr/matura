@@ -1,6 +1,6 @@
 <?php
 
-use Matura\Test\Support\Util;
+use Matura\Test\Util;
 
 Util::gensuite(array(
     'depth' => 2,

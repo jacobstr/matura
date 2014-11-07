@@ -1,7 +1,7 @@
-<?php namespace Matura\Test\Examples;
+<?php namespace Matura\Tests;
 
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
+use Matura\Test\User;
+use Matura\Test\Group;
 
 describe('Simple Example', function ($ctx) {
     before(function ($ctx) {
@@ -17,7 +17,7 @@ describe('Simple Example', function ($ctx) {
 
     it('should set the bob user', function ($ctx) {
         $ctx->sibling_value = 10;
-        expect($ctx->bob)->to->be->a('Matura\Test\Support\User');
+        expect($ctx->bob)->to->be->a('Matura\Test\User');
     });
 
     it('should not inherit a sibling\'s context modifications', function ($ctx) {
@@ -25,7 +25,7 @@ describe('Simple Example', function ($ctx) {
     });
 
     it('should set the admins group', function ($ctx) {
-        expect($ctx->admins)->to->be->a('Matura\Test\Support\Group');
+        expect($ctx->admins)->to->be->a('Matura\Test\Group');
     });
 
     it('should skip this test when invoked', function ($ctx) {
@@ -54,7 +54,7 @@ describe('Simple Example', function ($ctx) {
         });
 
         it('should inherit context from outer before blocks', function ($ctx) {
-            expect($ctx->bob)->to->be->a('Matura\Test\Support\User');
+            expect($ctx->bob)->to->be->a('Matura\Test\User');
         });
 
         it('should shadow context variables from outer contexts if assigned', function ($ctx) {

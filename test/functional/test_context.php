@@ -1,8 +1,8 @@
-<?php namespace Matura\Test;
+<?php namespace Matura\Tests;
 
 use Matura\Exceptions\Exception;
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
+use Matura\Test\User;
+use Matura\Test\Group;
 
 describe('Context', function ($ctx) {
     before(function ($ctx) {
@@ -33,12 +33,12 @@ describe('Context', function ($ctx) {
     });
 
     it('should have a user', function ($ctx) {
-        expect($ctx->user)->to->be->a('\Matura\Test\Support\User');
+        expect($ctx->user)->to->be->a('\Matura\Test\User');
         expect($ctx->user->name)->to->eql('bob');
     });
 
     it('should have a group', function ($ctx) {
-        expect($ctx->group)->to->be->a('\Matura\Test\Support\Group');
+        expect($ctx->group)->to->be->a('\Matura\Test\Group');
         expect($ctx->group->name)->to->eql('admins');
     });
 

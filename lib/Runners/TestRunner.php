@@ -13,6 +13,9 @@ use Matura\Core\InvocationContext;
 use Matura\Events\Listener;
 use Matura\Events\Emitter;
 
+use Matura\Filters\Defaults;
+use Matura\Filters\FilePathIterator;
+
 use ArrayIterator;
 use RegexIterator;
 use RecursiveIteratorIterator;
@@ -28,8 +31,9 @@ use FileSystemIterator;
 class TestRunner extends Runner
 {
     protected $options = array(
-        'filter' => '/test.*php/',
-        'grep' => '//'
+        'include' => Defaults::MATCH_TEST,
+        'exclude' => Defaults::MATCH_NONE,
+        'grep'    => Defaults::MATCH_ALL
     );
 
     /** @var The directory or folder containing our test file(s). */
@@ -53,7 +57,7 @@ class TestRunner extends Runner
         if (is_dir($this->path)) {
             $directory = new RecursiveDirectoryIterator($this->path, FilesystemIterator::SKIP_DOTS);
             $iterator = new RecursiveIteratorIterator($directory);
-            return new RegexIterator($iterator, $this->options['filter']);
+            return new FilePathIterator($iterator, $this->options['include'], $this->options['exclude']);
         } else {
             return new ArrayIterator(array(new SplFileInfo($this->path)));
         }

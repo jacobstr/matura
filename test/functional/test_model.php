@@ -1,8 +1,8 @@
-<?php namespace Matura\Test;
+<?php namespace Matura\Tests;
 
 use Matura\Exceptions\Exception;
-use Matura\Test\Support\User;
-use Matura\Test\Support\Group;
+use Matura\Test\User;
+use Matura\Test\Group;
 
 /**
  * Tests the construction of our test graph via our DSL.
