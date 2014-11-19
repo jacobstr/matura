@@ -15,7 +15,7 @@
     },
     "require-dev": {
         "mockery/mockery": "dev-master",
-        "mover-io/belt": "dev-master"
+        "mover-io/belt": "~1.0"
     },
     "autoload" : {
         "psr-4": {
