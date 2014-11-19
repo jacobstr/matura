@@ -3,6 +3,8 @@ Matura
 
 An RSpec / Mocha inspired testing tool for php.
 
+[Build Status](https://travis-ci.org/jacobstr/matura.svg)
+
 ---
 
 ## Installation
