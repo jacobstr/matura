@@ -46,7 +46,7 @@ An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
 	 				expect($user)->to->have->length(1);
 	 			});
 
-	 			it('should not accumulate users, function ($ctx){
+	 			it('should not accumulate users', function ($ctx){
 	 				$users = $ctx->db->find();
 	 				expect($users)->to->have->length(1);
 	 			});
