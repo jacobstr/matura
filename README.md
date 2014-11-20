@@ -16,22 +16,27 @@ An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
 - [Esperance](http://github.com/jacobstr/esperance) expectation library: `expect($result)->to->have->length(2)`.
 - A succinct DSL for defining tests.
 
+	```php
 		describe('Matura', function ($ctx){
 			it('should make writing tests fun', function ($ctx) {
 				expect($are_we_having_fun_yet)->to->eql(true);
 			});
 		});
+	```
 
 - Heirarchical blocks to drill down from basic to complex assertions.
 
+	```php
 		describe('User', function ($ctx) {
 			describe('Authorization', function ($ctx){
 				describe('OAuth', function ($ctx) {});
 			});
 		});
+	```
 
 - `before`, `before_all`, `after`, `after_all`, hooks with a well-defined ordering.
-
+	
+	```php
  		describe('User Database', function ($ctx) {
  			foreach(range(1,5) as $repetition) {
 	 			it('should insert a user', function ($ctx){
@@ -41,7 +46,7 @@ An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
 	 				expect($user)->to->have->length(1);
 	 			});
 
-	 			it('should not accumulate users, function ($ctx){
+	 			it('should not accumulate users', function ($ctx){
 	 				$users = $ctx->db->find();
 	 				expect($users)->to->have->length(1);
 	 			});
@@ -69,7 +74,45 @@ An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
  			after_all(function ($ctx) {
  				$ctx->db->drop($ctx->test_db);
  			});
+		});
+	```
 
+## Assertions
+
+As mentioned above, Matura uses Esperance as it's assertion library. Here
+are the core examples that you can use:
+
+```php
+	// Deep Equal(===)
+	expect($object)->to->be($cloned_object);
+	// Approximately Equal(==)
+	expect($object)->to->eql(NULL);
+	// Not Equal/Be/A
+	expect($object)->to->not->be('Walrus')
+	// Type Checking
+	expect($object)->to->be->a('AwesomeObject');
+	expect($object)->to->be->an('AwesomeObject');
+	// Truthy
+	expect($success)->to->be->ok();
+	// Invokability
+	expect($example_func)->to->be->invokable();
+	// Range Checking
+	expect($number)->to->be->within($start, $finish);
+	// Above
+	expect($number)->to->be->above($floor);
+	// Below
+	expect($number)->to->be->below($ceiling);
+	// Empty
+	expecy($an_array)->to->be->empty();
+	// Grep
+	expect($greppable)->to->match($regexp);
+	// Exception/Error Throwing
+	expect($function)->to->throw($klass, $expected_msg);
+	// Length
+	expect('bob')->to->have->length(3);
+	// Complex Assertions
+	expect($complex)->to->not->be('Simple')->and->to->be('Complex');
+```
 
 ## The CLI
 
