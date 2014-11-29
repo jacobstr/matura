@@ -126,7 +126,7 @@ class Test extends Command implements Listener
             $options['include'] = "/$include/";
         }
 
-        if ($match = $input->getOption('exclude')) {
+        if ($exclude = $input->getOption('exclude')) {
             $options['exclude'] = "/$exclude/";
         }
 
