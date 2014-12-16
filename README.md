@@ -1,10 +1,8 @@
 Matura
 ======
-[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/jacobstr/matura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/jacobstr/matura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) ![Build Status](https://travis-ci.org/jacobstr/matura.svg)
 
 An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
-
-[Build Status](https://travis-ci.org/jacobstr/matura.svg)
 
 ---
 
