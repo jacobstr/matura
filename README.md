@@ -1,5 +1,6 @@
 Matura
 ======
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/jacobstr/matura?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 An RSpec / Mocha inspired testing tool for php. Requires 5.3+.
 
