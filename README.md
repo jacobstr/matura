@@ -141,9 +141,16 @@ And the documentation for the standard test command:
 	 --no-ansi             Disable ANSI output.
 	 --no-interaction (-n) Do not ask any interactive question.
 
+## Filtering
+
 If you wish to filter specific tests within a suite/file, use `--grep`. Matura
-will be clever enough to run the requisite before/after hooks - hopefully. We're
-still fairly alpha ;)
+will be clever enough to run the requisite before/after hooks.
+
+## Test Result Association
+
+When running before/after hooks Matura will associate any test failures with the currently running test, rather than treating it as a file-level failure. This is particularly useful with Mockery's `close` method, which triggers additional assertions: was a method called, was it called with the right parameters, and so on. 
+
+For before_all / after_all hooks, the failure is associate with the surrounding describe block.
 
 ## Test Organization
 
